@@ -426,7 +426,7 @@ Animations should remain restrained and should never distract from the project c
 
 - [x] Phase 0 — Planning & Architecture
 - [x] Phase 1 — Repository & Project Setup
-- [ ] Phase 2 — PostgreSQL Database
+- [x] Phase 2 — PostgreSQL Database
 - [ ] Phase 3 — Express Foundation
 - [ ] Phase 4 — Admin Authentication
 - [ ] Phase 5 — Technologies API
@@ -775,3 +775,25 @@ The project now has:
 **Next**
 
 Phase 2 will introduce the PostgreSQL database and implement the six-table database schema defined during planning.
+
+
+
+## Phase 2 — PostgreSQL Database ✅
+
+Phase 2 established the PostgreSQL data layer for the developer portfolio.
+
+### Database Setup
+
+A dedicated PostgreSQL database and application user were created:
+
+- Database: `my_portfolio`
+- Application user: `my_portfolio_user`
+- Database connection is configured through the `DATABASE_URL` environment variable.
+- The Node.js backend connects to PostgreSQL using the `pg` package and a shared connection pool.
+
+### Database Connection
+
+The backend database connection is managed through:
+
+```text
+server/db/pool.js
