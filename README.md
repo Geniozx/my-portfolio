@@ -427,7 +427,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 0 — Planning & Architecture
 - [x] Phase 1 — Repository & Project Setup
 - [x] Phase 2 — PostgreSQL Database
-- [ ] Phase 3 — Express Foundation
+- [x] Phase 3 — Express Foundation
 - [ ] Phase 4 — Admin Authentication
 - [ ] Phase 5 — Technologies API
 - [ ] Phase 6 — Projects API
@@ -797,3 +797,30 @@ The backend database connection is managed through:
 
 ```text
 server/db/pool.js
+```
+
+
+## Phase 3 — Express Foundation ✅
+
+Phase 3 established the shared Express infrastructure that will support the portfolio REST API.
+
+### Express Application Structure
+
+The backend separates server startup, application configuration, routing, controllers, middleware, and database access.
+
+```text
+server/
+├── controllers/
+│   └── healthController.js
+├── db/
+│   ├── pool.js
+│   ├── schema.sql
+│   └── seed.sql
+├── middleware/
+│   ├── errorHandler.js
+│   └── notFound.js
+├── routes/
+│   ├── health.js
+│   └── index.js
+├── app.js
+└── server.js
