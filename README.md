@@ -429,7 +429,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 2 — PostgreSQL Database
 - [x] Phase 3 — Express Foundation
 - [x] Phase 4 — Admin Authentication
-- [ ] Phase 5 — Technologies API
+- [x] Phase 5 — Technologies API
 - [ ] Phase 6 — Projects API
 - [ ] Phase 7 — Project Images & Cloudinary
 - [ ] Phase 8 — Contact Messages API
@@ -784,9 +784,13 @@ The project now has:
 
 ### Phase 5 — Technologies API
 
+**Complete ✅**
+
+### Phase 6 — Projects API
+
 **Next**
 
-Phase 5 will build the public and protected technology endpoints that will allow the portfolio to retrieve and manage its technology catalog.
+Phase 6 will build the public and protected project endpoints that will allow the portfolio to retrieve and manage project case studies and their associated data.
 
 Current backend capabilities include:
 
@@ -807,6 +811,13 @@ Current backend capabilities include:
 - JWT authentication
 - Protected-route middleware
 - Authenticated administrator lookup
+- Public technologies API
+- Protected administrator technologies API
+- Technology creation
+- Partial technology updates
+- Technology deletion
+- Technology validation
+- PostgreSQL duplicate-name conflict handling
 
 Current API endpoints:
 
@@ -816,6 +827,13 @@ GET  /api/health
 
 POST /api/auth/login
 GET  /api/auth/me
+
+GET  /api/technologies
+
+GET    /api/admin/technologies
+POST   /api/admin/technologies
+PATCH  /api/admin/technologies/:id
+DELETE /api/admin/technologies/:id
 ```
 
 ---
@@ -1642,3 +1660,361 @@ Future admin CMS endpoints can now use `verifyToken` to restrict access to authe
 The backend is ready for:
 
 **Phase 5 — Technologies API**
+
+---
+
+## Phase 5 — Technologies API
+
+Phase 5 introduces the portfolio's technologies API.
+
+Technologies represent the languages, frameworks, databases, and development tools displayed throughout the portfolio and associated with individual projects.
+
+The API provides:
+
+```text
+Public technology access
+        +
+Protected administrator CRUD operations
+```
+
+The existing JWT authentication system from Phase 4 protects all administrator technology-management endpoints.
+
+### Technology Routes
+
+Public:
+
+```text
+GET /api/technologies
+```
+
+Protected administrator routes:
+
+```text
+GET    /api/admin/technologies
+POST   /api/admin/technologies
+PATCH  /api/admin/technologies/:id
+DELETE /api/admin/technologies/:id
+```
+
+All `/api/admin/technologies` routes require:
+
+```text
+Authorization: Bearer <token>
+```
+
+### Public Technologies API
+
+The public endpoint:
+
+```text
+GET /api/technologies
+```
+
+retrieves technologies from PostgreSQL.
+
+The response includes:
+
+```text
+id
+name
+category
+icon_url
+display_order
+created_at
+```
+
+Technologies are ordered using:
+
+```sql
+ORDER BY display_order ASC, name ASC
+```
+
+This endpoint will eventually provide technology data to the public Skills and Projects sections of the React portfolio.
+
+The public endpoint does not require authentication.
+
+### Administrator Technologies API
+
+Administrator technology routes are handled through:
+
+```text
+server/routes/adminTechnologies.js
+```
+
+The router applies:
+
+```js
+router.use(verifyToken);
+```
+
+before the CRUD routes.
+
+This means every route mounted under:
+
+```text
+/api/admin/technologies
+```
+
+requires a valid administrator JWT.
+
+The protected flow is:
+
+```text
+Admin request
+      ↓
+/api/admin/technologies
+      ↓
+verifyToken
+      ↓
+Technology controller
+      ↓
+PostgreSQL
+      ↓
+JSON response
+```
+
+### GET `/api/admin/technologies`
+
+Authenticated administrators can retrieve the technology collection through:
+
+```text
+GET /api/admin/technologies
+```
+
+Without a JWT, the endpoint returns:
+
+```text
+401 Unauthorized
+```
+
+With a valid JWT, the endpoint returns:
+
+```text
+200 OK
+```
+
+and the technology collection stored in PostgreSQL.
+
+The public and administrator GET routes reuse the same technology retrieval controller because they currently return the same technology data.
+
+### POST `/api/admin/technologies`
+
+Authenticated administrators can create technologies using:
+
+```text
+POST /api/admin/technologies
+```
+
+A technology can contain:
+
+```json
+{
+  "name": "Example Technology",
+  "category": "Backend",
+  "icon_url": null,
+  "display_order": 5
+}
+```
+
+The required fields are:
+
+```text
+name
+category
+```
+
+If either required field is missing, the API returns:
+
+```text
+400 Bad Request
+```
+
+A successful insert returns:
+
+```text
+201 Created
+```
+
+Technology names are protected by the database `UNIQUE` constraint.
+
+PostgreSQL unique-constraint violations use error code:
+
+```text
+23505
+```
+
+The controller translates this database error into:
+
+```text
+409 Conflict
+```
+
+with:
+
+```json
+{
+  "error": "A technology with that name already exists."
+}
+```
+
+This keeps PostgreSQL as the final authority for technology-name uniqueness while providing the client with a meaningful HTTP response.
+
+### PATCH `/api/admin/technologies/:id`
+
+Authenticated administrators can partially update a technology using:
+
+```text
+PATCH /api/admin/technologies/:id
+```
+
+Supported fields are:
+
+```text
+name
+category
+icon_url
+display_order
+```
+
+At least one supported field must be supplied.
+
+An empty update request returns:
+
+```text
+400 Bad Request
+```
+
+with:
+
+```json
+{
+  "error": "At least one field is required."
+}
+```
+
+The update query preserves fields that were not supplied in the request.
+
+A successful partial update returns:
+
+```text
+200 OK
+```
+
+If the technology does not exist:
+
+```text
+404 Not Found
+```
+
+is returned.
+
+Attempting to rename a technology to an existing technology name triggers the PostgreSQL unique constraint and returns:
+
+```text
+409 Conflict
+```
+
+### DELETE `/api/admin/technologies/:id`
+
+Authenticated administrators can delete technologies using:
+
+```text
+DELETE /api/admin/technologies/:id
+```
+
+If the technology does not exist, the endpoint returns:
+
+```text
+404 Not Found
+```
+
+A successful deletion returns:
+
+```text
+200 OK
+```
+
+along with the deleted technology.
+
+### Phase 5 Verification
+
+Technology API testing confirmed:
+
+- Public technology requests return `200 OK`
+- The public endpoint returns all 12 seeded technologies
+- Public technology access does not require authentication
+- Administrator technology routes reject missing JWTs with `401 Unauthorized`
+- Valid administrator JWTs can access protected technology routes
+- Expired JWTs are rejected with `401 Unauthorized`
+- Missing required create fields return `400 Bad Request`
+- Valid technology creation returns `201 Created`
+- New technologies are persisted to PostgreSQL
+- Duplicate technology names return `409 Conflict`
+- Empty PATCH requests return `400 Bad Request`
+- Partial technology updates return `200 OK`
+- Partial updates preserve fields that were not changed
+- Updating a nonexistent technology returns `404 Not Found`
+- Duplicate technology names during updates return `409 Conflict`
+- Deleting a nonexistent technology returns `404 Not Found`
+- Valid technology deletion returns `200 OK`
+- Deleted technologies are removed from PostgreSQL
+- Temporary CRUD test data was removed after testing
+- The database returned to the original 12 seeded technologies
+- `/api` continues to return `200 OK`
+- `/api/health` continues to report both the API and PostgreSQL as operational
+
+### Technologies API Architecture
+
+The completed Phase 5 flow is:
+
+```text
+PUBLIC
+
+React portfolio
+      ↓
+GET /api/technologies
+      ↓
+Technology controller
+      ↓
+PostgreSQL
+      ↓
+Technology collection
+
+
+ADMIN
+
+Administrator
+      ↓
+JWT
+      ↓
+/api/admin/technologies
+      ↓
+verifyToken
+      ↓
+Technology controller
+      ↓
+Parameterized SQL
+      ↓
+PostgreSQL
+      ↓
+CRUD response
+```
+
+### Phase 5 Result
+
+**Phase 5 — Technologies API is complete.**
+
+The portfolio backend can now:
+
+- Publicly expose portfolio technologies
+- Protect technology-management endpoints
+- Create technologies
+- Partially update technologies
+- Delete technologies
+- Validate required technology data
+- Detect duplicate technology names
+- Return appropriate HTTP status codes
+- Persist technology changes to PostgreSQL
+- Reuse the Phase 4 JWT middleware for CMS resources
+- Server JavaScript syntax checks pass
+- React client lint and production build pass
