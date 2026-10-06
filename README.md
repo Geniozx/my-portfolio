@@ -430,7 +430,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 3 — Express Foundation
 - [x] Phase 4 — Admin Authentication
 - [x] Phase 5 — Technologies API
-- [ ] Phase 6 — Projects API
+- [x] Phase 6 — Projects API
 - [ ] Phase 7 — Project Images & Cloudinary
 - [ ] Phase 8 — Contact Messages API
 - [ ] Phase 9 — React Foundation
@@ -788,9 +788,13 @@ The project now has:
 
 ### Phase 6 — Projects API
 
+**Complete ✅**
+
+### Phase 7 — Project Images & Cloudinary
+
 **Next**
 
-Phase 6 will build the public and protected project endpoints that will allow the portfolio to retrieve and manage project case studies and their associated data.
+Phase 7 will add project image management and Cloudinary integration so portfolio projects can include cover images, screenshots, captions, alt text, and ordered image galleries.
 
 Current backend capabilities include:
 
@@ -818,6 +822,20 @@ Current backend capabilities include:
 - Technology deletion
 - Technology validation
 - PostgreSQL duplicate-name conflict handling
+- Public projects API
+- Published-project filtering
+- Public project lookup by slug
+- Protected administrator projects API
+- Project creation
+- Partial project updates
+- Project deletion
+- Project publishing and unpublishing
+- Featured-project management
+- Project display ordering
+- Required project-field validation
+- PostgreSQL duplicate-slug conflict handling
+- Project-to-technology relationship management
+- Transaction-safe technology assignment and replacement
 
 Current API endpoints:
 
@@ -834,6 +852,16 @@ GET    /api/admin/technologies
 POST   /api/admin/technologies
 PATCH  /api/admin/technologies/:id
 DELETE /api/admin/technologies/:id
+
+GET /api/projects
+GET /api/projects/:slug
+
+GET    /api/admin/projects
+GET    /api/admin/projects/:id
+POST   /api/admin/projects
+PATCH  /api/admin/projects/:id
+DELETE /api/admin/projects/:id
+PUT    /api/admin/projects/:id/technologies
 ```
 
 ---
@@ -2018,3 +2046,428 @@ The portfolio backend can now:
 - Reuse the Phase 4 JWT middleware for CMS resources
 - Server JavaScript syntax checks pass
 - React client lint and production build pass
+
+
+---
+
+## Phase 6 — Projects API
+
+Phase 6 introduces the portfolio's projects API.
+
+Projects represent the portfolio case studies displayed to public visitors and managed through the protected administrator CMS.
+
+The API provides:
+
+```text
+Public access to published projects
+        +
+Protected administrator CRUD operations
+        +
+Project-to-technology relationship management
+```
+
+The existing JWT authentication system protects all administrator project-management endpoints.
+
+### Project Routes
+
+Public:
+
+```text
+GET /api/projects
+GET /api/projects/:slug
+```
+
+Protected administrator routes:
+
+```text
+GET    /api/admin/projects
+GET    /api/admin/projects/:id
+POST   /api/admin/projects
+PATCH  /api/admin/projects/:id
+DELETE /api/admin/projects/:id
+PUT    /api/admin/projects/:id/technologies
+```
+
+All `/api/admin/projects` routes require:
+
+```text
+Authorization: Bearer <token>
+```
+
+### Public Projects API
+
+The public projects collection:
+
+```text
+GET /api/projects
+```
+
+returns only projects where:
+
+```text
+published = TRUE
+```
+
+Projects are ordered using:
+
+```sql
+ORDER BY display_order ASC, created_at DESC
+```
+
+The public single-project endpoint:
+
+```text
+GET /api/projects/:slug
+```
+
+retrieves a published project using its unique slug.
+
+Unpublished projects are intentionally hidden from both public project endpoints.
+
+Attempting to retrieve an unpublished or nonexistent project through the public slug endpoint returns:
+
+```text
+404 Not Found
+```
+
+### Administrator Projects API
+
+Administrator project routes are handled through:
+
+```text
+server/routes/adminProjects.js
+```
+
+The router applies the existing JWT authentication middleware so project-management operations require an authenticated administrator.
+
+Unlike the public API, administrator project queries include both published and unpublished projects.
+
+This allows project case studies to be created and edited as drafts before they become visible on the public portfolio.
+
+### Project Creation
+
+Administrators can create projects using:
+
+```text
+POST /api/admin/projects
+```
+
+Required fields are:
+
+```text
+title
+slug
+short_description
+```
+
+These requirements match the PostgreSQL `projects` table constraints.
+
+Optional project data includes:
+
+```text
+description
+problem
+solution
+features
+challenges
+lessons_learned
+project_type
+status
+github_url
+live_url
+featured
+published
+display_order
+```
+
+Successful project creation returns:
+
+```text
+201 Created
+```
+
+Missing required fields return:
+
+```text
+400 Bad Request
+```
+
+Project slugs are unique.
+
+Attempting to create another project with an existing slug returns:
+
+```text
+409 Conflict
+```
+
+### Project Updates
+
+Administrators can partially update projects using:
+
+```text
+PATCH /api/admin/projects/:id
+```
+
+Only supplied project fields are modified.
+
+Supported updates include project content, status, URLs, display order, featured state, and publication state.
+
+An empty update returns:
+
+```text
+400 Bad Request
+```
+
+Updating a nonexistent project returns:
+
+```text
+404 Not Found
+```
+
+Attempting to update a project to a slug already used by another project returns:
+
+```text
+409 Conflict
+```
+
+The `updated_at` timestamp is refreshed whenever a project is successfully updated.
+
+### Project Publishing
+
+Projects can exist as unpublished drafts:
+
+```text
+published = false
+```
+
+Draft projects remain accessible to authenticated administrators but are excluded from the public API.
+
+Changing a project to:
+
+```text
+published = true
+```
+
+immediately makes it available through:
+
+```text
+GET /api/projects
+GET /api/projects/:slug
+```
+
+This provides the publication workflow needed by the future administrator CMS.
+
+### Project Deletion
+
+Administrators can delete projects using:
+
+```text
+DELETE /api/admin/projects/:id
+```
+
+Deleting a nonexistent project returns:
+
+```text
+404 Not Found
+```
+
+Successful deletion returns:
+
+```text
+200 OK
+```
+
+along with basic information about the deleted project.
+
+The PostgreSQL schema uses cascading foreign keys so related project data can be safely removed when a project is deleted.
+
+### Project Technologies
+
+Projects and technologies use the existing many-to-many relationship:
+
+```text
+projects
+    ↓
+project_technologies
+    ↓
+technologies
+```
+
+Administrators can replace a project's complete technology set using:
+
+```text
+PUT /api/admin/projects/:id/technologies
+```
+
+The request body uses:
+
+```json
+{
+  "technology_ids": [1, 3, 6]
+}
+```
+
+`technology_ids` must be an array containing valid positive integer technology IDs.
+
+Duplicate IDs are removed before database operations are performed.
+
+The endpoint uses a PostgreSQL transaction to keep relationship updates consistent.
+
+Before replacing relationships, the API verifies:
+
+```text
+The project exists
+        +
+Every requested technology exists
+```
+
+If a technology ID is invalid, the request returns:
+
+```text
+400 Bad Request
+```
+
+and existing project-technology relationships remain unchanged.
+
+If the project does not exist, the request returns:
+
+```text
+404 Not Found
+```
+
+Sending:
+
+```json
+{
+  "technology_ids": []
+}
+```
+
+is valid and removes all technology associations from the project.
+
+### Phase 6 Verification
+
+Projects API testing confirmed:
+
+- Public project collection requests return `200 OK`
+- Only published projects are exposed publicly
+- Unpublished projects remain hidden from the public collection
+- Public slug lookup returns `404 Not Found` for unpublished projects
+- Published projects can be retrieved by slug
+- Administrator project routes reject missing JWTs with `401 Unauthorized`
+- Valid administrator JWTs can access project-management routes
+- Administrator queries include unpublished drafts
+- Missing required create fields return `400 Bad Request`
+- Valid project creation returns `201 Created`
+- New projects are persisted to PostgreSQL
+- Duplicate project slugs during creation return `409 Conflict`
+- Empty PATCH requests return `400 Bad Request`
+- Partial project updates return `200 OK`
+- Project publication changes are immediately reflected by the public API
+- Updating a nonexistent project returns `404 Not Found`
+- Duplicate project slugs during updates return `409 Conflict`
+- Deleting a nonexistent project returns `404 Not Found`
+- Valid project deletion returns `200 OK`
+- Deleted projects can no longer be retrieved
+- Project technology assignment returns `200 OK`
+- Technology assignments use replacement semantics
+- Invalid technology IDs return `400 Bad Request`
+- Failed technology assignment does not destroy existing relationships
+- Assigning technologies to a nonexistent project returns `404 Not Found`
+- An empty technology array successfully clears all project technologies
+- Temporary Phase 6 test projects were removed after testing
+- The projects table returned to its clean pre-test state
+- Server JavaScript syntax checks pass
+- React client ESLint passes
+- React client production build passes
+
+### Projects API Architecture
+
+The completed Phase 6 flow is:
+
+```text
+PUBLIC
+
+React portfolio
+      ↓
+GET /api/projects
+GET /api/projects/:slug
+      ↓
+Project controller
+      ↓
+Published-project filtering
+      ↓
+PostgreSQL
+      ↓
+Public project data
+
+
+ADMIN
+
+Administrator
+      ↓
+JWT
+      ↓
+/api/admin/projects
+      ↓
+verifyToken
+      ↓
+Project controller
+      ↓
+Parameterized SQL
+      ↓
+PostgreSQL
+      ↓
+Project CRUD
+
+
+PROJECT TECHNOLOGIES
+
+Administrator
+      ↓
+JWT
+      ↓
+PUT /api/admin/projects/:id/technologies
+      ↓
+Validate project
+      ↓
+Validate technology IDs
+      ↓
+PostgreSQL transaction
+      ↓
+project_technologies
+      ↓
+Updated technology set
+```
+
+### Phase 6 Result
+
+**Phase 6 — Projects API is complete.**
+
+The portfolio backend can now:
+
+- Publicly expose published portfolio projects
+- Keep draft projects private
+- Retrieve public projects by slug
+- Protect project-management endpoints
+- Create portfolio projects
+- Partially update project case studies
+- Publish and unpublish projects
+- Feature projects
+- Control project display order
+- Delete projects
+- Validate required project data
+- Detect duplicate project slugs
+- Associate technologies with projects
+- Replace project technology sets transactionally
+- Safely reject invalid project-technology relationships
+- Return appropriate HTTP status codes
+- Persist project changes to PostgreSQL
+- Reuse the existing JWT middleware for project CMS resources
+- Pass server JavaScript syntax verification
+- Pass React ESLint verification
+- Pass the React production build
+
+The backend is ready for:
+
+**Phase 7 — Project Images & Cloudinary**
