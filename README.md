@@ -428,7 +428,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 1 — Repository & Project Setup
 - [x] Phase 2 — PostgreSQL Database
 - [x] Phase 3 — Express Foundation
-- [ ] Phase 4 — Admin Authentication
+- [x] Phase 4 — Admin Authentication
 - [ ] Phase 5 — Technologies API
 - [ ] Phase 6 — Projects API
 - [ ] Phase 7 — Project Images & Cloudinary
@@ -772,11 +772,53 @@ The project now has:
 
 ### Phase 2 — PostgreSQL Database
 
+**Complete ✅**
+
+### Phase 3 — Express Foundation
+
+**Complete ✅**
+
+### Phase 4 — Admin Authentication
+
+**Complete ✅**
+
+### Phase 5 — Technologies API
+
 **Next**
 
-Phase 2 will introduce the PostgreSQL database and implement the six-table database schema defined during planning.
+Phase 5 will build the public and protected technology endpoints that will allow the portfolio to retrieve and manage its technology catalog.
 
+Current backend capabilities include:
 
+- PostgreSQL database architecture
+- Six-table relational schema
+- Seeded technology data
+- PostgreSQL connection pooling
+- Express REST API foundation
+- Central `/api` router
+- CORS configuration
+- HTTP request logging
+- JSON request parsing
+- API and database health checks
+- JSON 404 handling
+- Centralized Express error handling
+- Secure administrator creation
+- bcrypt password hashing and verification
+- JWT authentication
+- Protected-route middleware
+- Authenticated administrator lookup
+
+Current API endpoints:
+
+```text
+GET  /api
+GET  /api/health
+
+POST /api/auth/login
+GET  /api/auth/me
+```
+
+---
 
 ## Phase 2 — PostgreSQL Database ✅
 
@@ -799,14 +841,255 @@ The backend database connection is managed through:
 server/db/pool.js
 ```
 
+The connection pool uses the private `DATABASE_URL` stored in:
+
+```text
+server/.env
+```
+
+A safe placeholder is documented in:
+
+```text
+server/.env.example
+```
+
+The real database credentials are never committed to Git.
+
+### Database Schema
+
+The database schema is defined in:
+
+```text
+server/db/schema.sql
+```
+
+The portfolio uses six primary tables:
+
+```text
+admins
+projects
+technologies
+project_technologies
+project_images
+contact_messages
+```
+
+### `admins`
+
+Stores administrator accounts used to access the protected portfolio CMS.
+
+Important fields include:
+
+```text
+id
+username
+email
+password_hash
+created_at
+updated_at
+```
+
+Both `username` and `email` are unique.
+
+Only password hashes are stored in the database.
+
+### `projects`
+
+Stores portfolio project and case-study content.
+
+Important fields include:
+
+```text
+id
+title
+slug
+short_description
+description
+problem
+solution
+features
+challenges
+lessons_learned
+project_type
+status
+github_url
+live_url
+featured
+published
+display_order
+created_at
+updated_at
+```
+
+The `slug` field is unique and will support public project lookup.
+
+### `technologies`
+
+Stores technologies displayed throughout the portfolio.
+
+Important fields include:
+
+```text
+id
+name
+category
+icon_url
+display_order
+created_at
+```
+
+Technology names are unique.
+
+### `project_technologies`
+
+Provides the many-to-many relationship between projects and technologies.
+
+```text
+project_id
+technology_id
+```
+
+The two columns form a composite primary key.
+
+Both foreign keys use `ON DELETE CASCADE`.
+
+### `project_images`
+
+Stores metadata for project screenshots and other project media.
+
+Important fields include:
+
+```text
+id
+project_id
+image_url
+public_id
+alt_text
+caption
+is_cover
+display_order
+created_at
+```
+
+Cloudinary will store the actual media files in a later phase.
+
+PostgreSQL stores the associated URL, Cloudinary public ID, accessibility text, caption, cover-image state, and display order.
+
+Deleting a project automatically removes its associated image records through `ON DELETE CASCADE`.
+
+### `contact_messages`
+
+Stores messages submitted through the public portfolio contact form.
+
+Important fields include:
+
+```text
+id
+name
+email
+subject
+message
+is_read
+created_at
+```
+
+Messages default to unread.
+
+### Technology Seed Data
+
+Initial technology data is stored in:
+
+```text
+server/db/seed.sql
+```
+
+The initial technology catalog contains:
+
+```text
+Languages
+- JavaScript
+- Python
+
+Frontend
+- React
+- HTML
+- CSS
+
+Backend
+- Node.js
+- Express
+- Django
+- Django REST Framework
+
+Database
+- PostgreSQL
+
+Tools
+- Git
+- GitHub
+```
+
+The seed uses:
+
+```sql
+ON CONFLICT (name) DO NOTHING;
+```
+
+This allows the seed file to be run repeatedly without creating duplicate technology records.
+
+A total of 12 initial technologies were successfully seeded.
+
+### Relational Testing
+
+Phase 2 database testing verified:
+
+- All six tables were created successfully
+- PostgreSQL connectivity through Node.js works
+- 12 technology records were seeded
+- Re-running the technology seed does not create duplicates
+- Projects can be associated with technologies
+- Duplicate project/technology relationships are rejected
+- Project images can reference projects
+- Deleting a project cascades to related technology relationships
+- Deleting a project cascades to related image records
+
+Temporary relational test records were removed after testing.
+
+At the end of Phase 2:
+
+```text
+projects               0
+project_images         0
+project_technologies   0
+technologies          12
+```
+
+### Phase 2 Result
+
+**Phase 2 — PostgreSQL Database is complete.**
+
+The application now has a normalized relational database capable of supporting:
+
+- Administrator authentication
+- Portfolio projects
+- Technology categorization
+- Project technology stacks
+- Project image galleries
+- Contact messages
+
+This database foundation is used by the Express API beginning in Phase 3.
+
+---
 
 ## Phase 3 — Express Foundation ✅
 
-Phase 3 established the shared Express infrastructure that will support the portfolio REST API.
+Phase 3 established the shared Express infrastructure that supports the portfolio REST API.
 
 ### Express Application Structure
 
 The backend separates server startup, application configuration, routing, controllers, middleware, and database access.
+
+The Phase 3 backend structure includes:
 
 ```text
 server/
@@ -824,3 +1107,538 @@ server/
 │   └── index.js
 ├── app.js
 └── server.js
+```
+
+Authentication-specific files are introduced in Phase 4.
+
+### Server Entry Point
+
+`server/server.js`:
+
+- Loads environment variables using `dotenv`
+- Imports the configured Express application
+- Uses the `PORT` environment variable
+- Falls back to port `3000`
+- Listens on `0.0.0.0`
+
+Binding Express to:
+
+```text
+0.0.0.0
+```
+
+allows the backend running inside WSL to be reached from the Windows browser during local development.
+
+### Express Application
+
+`server/app.js` configures shared middleware and API routing.
+
+The application uses:
+
+- `cors`
+- `morgan`
+- `express.json()`
+- Central `/api` routing
+- JSON 404 middleware
+- Centralized error handling
+
+### API Base Route
+
+The central API router is mounted at:
+
+```text
+/api
+```
+
+Request:
+
+```text
+GET /api
+```
+
+Response:
+
+```json
+{
+  "message": "Developer Portfolio API"
+}
+```
+
+### CORS
+
+CORS is configured using:
+
+```text
+CLIENT_URL
+```
+
+During local development:
+
+```text
+CLIENT_URL=http://localhost:5173
+```
+
+This allows the React frontend to communicate with the Express API while preventing unrestricted browser origins.
+
+### HTTP Logging
+
+Morgan provides HTTP request logging during development.
+
+Example requests appear in the server terminal with information such as:
+
+```text
+GET /api/health 200
+POST /api/auth/login 200
+```
+
+### JSON Request Parsing
+
+Express uses:
+
+```js
+express.json()
+```
+
+to parse incoming JSON request bodies.
+
+This supports endpoints such as administrator login and future CMS operations.
+
+### Health Endpoint
+
+The backend exposes:
+
+```text
+GET /api/health
+```
+
+The health controller performs a PostgreSQL query:
+
+```sql
+SELECT 1
+```
+
+A successful response is:
+
+```json
+{
+  "status": "ok",
+  "api": "online",
+  "database": "connected"
+}
+```
+
+This verifies both the Express API and PostgreSQL connection.
+
+### JSON 404 Handling
+
+Unknown routes return a consistent JSON response:
+
+```json
+{
+  "error": "Route not found."
+}
+```
+
+This replaces Express's default HTML 404 response.
+
+The behavior was verified for:
+
+```text
+GET /
+GET /api/does-not-exist
+```
+
+### Centralized Error Handling
+
+The application includes:
+
+```text
+server/middleware/errorHandler.js
+```
+
+Unhandled controller errors can be passed to the middleware using:
+
+```js
+next(error);
+```
+
+The middleware then returns a consistent JSON error response.
+
+A temporary test endpoint was used during Phase 3 to verify the `500` error path and was removed after testing.
+
+### Frontend-to-Backend Integration
+
+A temporary React integration test verified the complete development path:
+
+```text
+React
+  ↓
+HTTP request
+  ↓
+Express
+  ↓
+Health controller
+  ↓
+PostgreSQL
+  ↓
+JSON response
+  ↓
+React
+```
+
+The React application successfully displayed:
+
+```text
+API: online | Database: connected
+```
+
+after fetching the Express health endpoint.
+
+The temporary frontend integration code was removed after verification.
+
+### WSL Development Networking
+
+During development, Express initially worked inside WSL but could not be reached through the Windows browser.
+
+The server was updated to listen on:
+
+```text
+0.0.0.0
+```
+
+This successfully exposed the Express development server to the Windows host.
+
+### Environment Variables
+
+By the end of Phase 3, the backend uses:
+
+```text
+PORT
+DATABASE_URL
+CLIENT_URL
+```
+
+Private values are stored in:
+
+```text
+server/.env
+```
+
+Safe placeholders are documented in:
+
+```text
+server/.env.example
+```
+
+### Phase 3 Verification
+
+Phase 3 testing confirmed:
+
+- Express development server starts successfully
+- Express production server starts successfully
+- CORS headers are returned correctly
+- Morgan logs incoming requests
+- JSON request parsing is configured
+- `GET /api` returns the API response
+- `GET /api/health` returns `200 OK`
+- PostgreSQL health query succeeds
+- Unknown routes return JSON `404` responses
+- Centralized `500` error handling works
+- React can communicate with Express
+- Express can communicate with PostgreSQL
+- Windows browser can reach the WSL Express server
+- Temporary test routes were removed
+- Temporary React integration code was removed
+- Client ESLint passes
+- Client production build succeeds
+
+### Phase 3 Result
+
+**Phase 3 — Express Foundation is complete.**
+
+The portfolio now has a stable Express API foundation with routing, middleware, database connectivity, health monitoring, error handling, and frontend communication.
+
+This foundation is used by the authentication system introduced in Phase 4.
+
+---
+
+## Phase 4 — Admin Authentication ✅
+
+Phase 4 adds secure administrator authentication for the portfolio CMS.
+
+There is no public registration endpoint.
+
+Administrator accounts are created locally through a setup script and stored in PostgreSQL using bcrypt password hashes.
+
+### Authentication Dependencies
+
+The Express server uses:
+
+```text
+bcrypt
+jsonwebtoken
+```
+
+`bcrypt` handles password hashing and password verification.
+
+`jsonwebtoken` handles JSON Web Token creation and verification.
+
+### Environment Configuration
+
+Authentication requires a private JWT signing secret:
+
+```env
+JWT_SECRET=replace_with_secure_random_secret
+```
+
+The real secret is stored only in:
+
+```text
+server/.env
+```
+
+The `.env` file is excluded from Git.
+
+The safe placeholder is documented in:
+
+```text
+server/.env.example
+```
+
+No real JWT secret is stored in the repository.
+
+### Initial Administrator Creation
+
+The initial administrator is created using:
+
+```text
+server/scripts/createAdmin.js
+```
+
+The script:
+
+- Requires a username and email
+- Prompts locally for a password
+- Requires a minimum password length
+- Checks for an existing username or email
+- Hashes the password using bcrypt
+- Uses parameterized PostgreSQL queries
+- Stores only the bcrypt password hash
+- Returns only safe administrator information
+- Rejects duplicate administrator accounts
+
+Administrator credentials are not stored in:
+
+```text
+server/db/seed.sql
+```
+
+The initial administrator was successfully created. The setup script includes duplicate-account protection by checking for an existing username or email before insertion.
+
+### Authentication Routes
+
+The authentication router provides:
+
+```text
+POST /api/auth/login
+GET  /api/auth/me
+```
+
+There is intentionally no public registration route.
+
+### POST `/api/auth/login`
+
+The login endpoint accepts administrator credentials.
+
+Authentication flow:
+
+```text
+Username + password
+        ↓
+Find administrator in PostgreSQL
+        ↓
+bcrypt.compare()
+        ↓
+Credentials valid
+        ↓
+jwt.sign()
+        ↓
+JWT returned
+```
+
+A successful response has the following structure:
+
+```json
+{
+  "token": "<jwt>",
+  "admin": {
+    "id": 1,
+    "username": "<username>",
+    "email": "<email>"
+  }
+}
+```
+
+The administrator password and `password_hash` are never returned.
+
+Unknown usernames and incorrect passwords intentionally produce the same response:
+
+```json
+{
+  "error": "Invalid username or password."
+}
+```
+
+This prevents the authentication endpoint from revealing whether a particular administrator username exists.
+
+JWTs currently expire after:
+
+```text
+1 hour
+```
+
+### JWT Verification Middleware
+
+Protected routes use:
+
+```text
+server/middleware/verifyToken.js
+```
+
+Clients authenticate using:
+
+```text
+Authorization: Bearer <token>
+```
+
+The middleware:
+
+1. Reads the `Authorization` header
+2. Verifies the `Bearer` format
+3. Extracts the JWT
+4. Verifies the token using `JWT_SECRET`
+5. Attaches the decoded JWT payload to `req.admin`
+6. Passes control to the protected controller
+
+Missing authentication returns:
+
+```json
+{
+  "error": "Authentication required."
+}
+```
+
+Invalid or expired JWTs return:
+
+```json
+{
+  "error": "Invalid or expired token."
+}
+```
+
+This middleware will be reused by future protected CMS endpoints.
+
+### GET `/api/auth/me`
+
+The `/api/auth/me` endpoint verifies the administrator's JWT and retrieves the current administrator record from PostgreSQL.
+
+Flow:
+
+```text
+GET /api/auth/me
+        ↓
+Authorization: Bearer <token>
+        ↓
+verifyToken
+        ↓
+jwt.verify()
+        ↓
+req.admin.id
+        ↓
+PostgreSQL
+        ↓
+Current administrator
+```
+
+The database query returns only:
+
+```text
+id
+username
+email
+created_at
+updated_at
+```
+
+The password hash is never returned.
+
+Querying PostgreSQL instead of returning only the JWT payload ensures the endpoint represents the current administrator record stored in the database.
+
+### Phase 4 Verification
+
+Authentication testing confirmed:
+
+- Missing login credentials return `400 Bad Request`
+- Empty passwords return `400 Bad Request`
+- Unknown administrator usernames return `401 Unauthorized`
+- Incorrect passwords return `401 Unauthorized`
+- Unknown usernames and incorrect passwords use the same error response
+- Correct credentials return `200 OK`
+- bcrypt successfully verifies the stored password hash
+- Successful login generates a signed JWT
+- Login responses never expose `password_hash`
+- Missing authorization headers return `401 Unauthorized`
+- Empty Bearer tokens return `401 Unauthorized`
+- Invalid JWTs return `401 Unauthorized`
+- Valid JWTs successfully pass `verifyToken`
+- Valid JWTs can access `/api/auth/me`
+- `/api/auth/me` retrieves the administrator from PostgreSQL
+- Protected responses never expose `password_hash`
+- Initial administrator creation succeeds
+- The administrator creation script checks for an existing username or email before inserting a new administrator
+
+### Authentication Architecture
+
+The completed authentication flow is:
+
+```text
+Admin credentials
+      ↓
+POST /api/auth/login
+      ↓
+PostgreSQL administrator lookup
+      ↓
+bcrypt.compare()
+      ↓
+JWT generation
+      ↓
+Bearer token
+      ↓
+verifyToken
+      ↓
+JWT verification
+      ↓
+PostgreSQL administrator lookup
+      ↓
+Protected administrator response
+```
+
+### Phase 4 Result
+
+**Phase 4 — Admin Authentication is complete.**
+
+The portfolio backend can now:
+
+- Securely store administrator passwords
+- Authenticate an administrator
+- Issue signed JWTs
+- Reject invalid credentials
+- Protect private API routes
+- Identify the currently authenticated administrator
+- Safely retrieve administrator information from PostgreSQL
+
+Future admin CMS endpoints can now use `verifyToken` to restrict access to authenticated administrators.
+
+The backend is ready for:
+
+**Phase 5 — Technologies API**
