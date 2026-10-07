@@ -432,7 +432,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 5 — Technologies API
 - [x] Phase 6 — Projects API
 - [x] Phase 7 — Project Images & Cloudinary
-- [ ] Phase 8 — Contact Messages API
+- [x] Phase 8 — Contact Messages API
 - [ ] Phase 9 — React Foundation
 - [ ] Phase 10 — Public Portfolio Shell
 - [ ] Phase 11 — Skills & Projects Integration
@@ -796,9 +796,26 @@ The project now has:
 
 ### Phase 8 — Contact Messages API
 
+**Complete ✅**
+
+### Phase 9 — React Foundation
+
 **Next**
 
-Phase 8 will add the portfolio contact-message API so public visitors can submit messages and authenticated administrators can review, manage, mark, and delete submitted messages.
+Expected:
+
+- Establish the React application structure for the public portfolio and administrator CMS
+- Configure React Router
+- Create the initial public and administrator route structure
+- Create reusable layout and shared UI foundations
+- Establish API service utilities for communication with the Express backend
+- Configure frontend environment variables for the API base URL
+- Prepare authentication state management for administrator routes
+- Establish the initial responsive styling foundation
+- Verify React-to-Express communication
+- Keep the client ESLint and production build clean
+
+
 
 Current backend capabilities include:
 
@@ -840,6 +857,15 @@ Current backend capabilities include:
 - PostgreSQL duplicate-slug conflict handling
 - Project-to-technology relationship management
 - Transaction-safe technology assignment and replacement
+- Public contact message submission
+- Contact input normalization and validation
+- Contact email format validation
+- Contact message persistence in PostgreSQL
+- Administrator contact message retrieval
+- Individual administrator message retrieval
+- Read/unread message management
+- Administrator message deletion
+- JWT-protected message management
 
 Current API endpoints:
 
@@ -866,6 +892,13 @@ POST   /api/admin/projects
 PATCH  /api/admin/projects/:id
 DELETE /api/admin/projects/:id
 PUT    /api/admin/projects/:id/technologies
+
+POST /api/contact
+
+GET    /api/admin/messages
+GET    /api/admin/messages/:id
+PATCH  /api/admin/messages/:id
+DELETE /api/admin/messages/:id
 ```
 
 ---
@@ -3013,3 +3046,526 @@ The portfolio backend can now:
 The backend is ready for:
 
 **Phase 8 — Contact Messages API**
+
+---
+
+## Phase 8 — Contact Messages API
+
+Phase 8 introduces the portfolio contact-message system.
+
+Visitors can now submit messages through a public API endpoint, while authenticated administrators can securely retrieve, review, update, and delete submitted messages.
+
+The contact-message flow combines:
+
+```text
+Public contact submission
+        +
+Input normalization and validation
+        +
+PostgreSQL message storage
+        +
+Protected administrator message management
+```
+
+### Contact Message Database Storage
+
+Contact messages are stored in the existing:
+
+```text
+contact_messages
+```
+
+table.
+
+Each contact message stores:
+
+```text
+id
+name
+email
+subject
+message
+is_read
+created_at
+```
+
+The required database fields are:
+
+```text
+name
+email
+message
+```
+
+The `subject` field is optional.
+
+New messages default to:
+
+```text
+is_read = false
+```
+
+This allows the future administrator CMS to distinguish between unread messages and messages that have already been reviewed.
+
+The existing database limits are:
+
+```text
+name       VARCHAR(100)
+email      VARCHAR(255)
+subject    VARCHAR(200)
+message    TEXT
+```
+
+Application-level validation prevents normal requests from exceeding these limits before PostgreSQL processes the insert.
+
+### Public Contact Route
+
+Portfolio visitors can submit contact messages using:
+
+```text
+POST /api/contact
+```
+
+This route is intentionally public because visitors do not need an account or administrator authentication to contact the portfolio owner.
+
+A contact request can contain:
+
+```json
+{
+  "name": "Example User",
+  "email": "user@example.com",
+  "subject": "Portfolio Project Inquiry",
+  "message": "I would like to discuss building a web application."
+}
+```
+
+The following fields are required:
+
+```text
+name
+email
+message
+```
+
+The following field is optional:
+
+```text
+subject
+```
+
+Successful contact submissions return:
+
+```text
+201 Created
+```
+
+### Contact Message Creation
+
+Public message creation is handled by:
+
+```text
+server/controllers/contactMessageController.js
+```
+
+Before inserting a message, the controller normalizes the incoming string values.
+
+Leading and trailing whitespace is removed from:
+
+```text
+name
+email
+subject
+message
+```
+
+For example:
+
+```text
+"   Trimmed Test   "
+```
+
+is stored as:
+
+```text
+"Trimmed Test"
+```
+
+An empty or whitespace-only optional subject is normalized to:
+
+```text
+null
+```
+
+After validation succeeds, the message is inserted into PostgreSQL and returned with its generated ID, unread state, and creation timestamp.
+
+### Contact Message Validation
+
+Public contact submissions are validated before reaching the normal PostgreSQL insertion flow.
+
+Required fields cannot be missing or contain only whitespace.
+
+Missing or empty required values return:
+
+```text
+400 Bad Request
+```
+
+with:
+
+```json
+{
+  "error": "Name, email, and message are required."
+}
+```
+
+Email addresses are checked using application-level format validation.
+
+Invalid email addresses return:
+
+```text
+400 Bad Request
+```
+
+with:
+
+```json
+{
+  "error": "Please provide a valid email address."
+}
+```
+
+Application validation also mirrors the PostgreSQL length constraints.
+
+Maximum lengths are:
+
+```text
+name       100 characters
+email      255 characters
+subject    200 characters
+```
+
+Values exceeding those limits return:
+
+```text
+400 Bad Request
+```
+
+before a database constraint error is required.
+
+The `message` column uses PostgreSQL `TEXT`, so Phase 8 does not introduce a separate message-length limit.
+
+### Protected Administrator Message Routes
+
+Contact-message management is available through protected administrator routes.
+
+Protected routes:
+
+```text
+GET    /api/admin/messages
+GET    /api/admin/messages/:id
+PATCH  /api/admin/messages/:id
+DELETE /api/admin/messages/:id
+```
+
+All administrator message routes require:
+
+```text
+Authorization: Bearer <token>
+```
+
+The existing JWT authentication middleware protects the administrator message router.
+
+Requests without authentication return:
+
+```text
+401 Unauthorized
+```
+
+This keeps submitted visitor information unavailable through the public API.
+
+### Administrator Message Collection
+
+Administrators can retrieve all contact messages using:
+
+```text
+GET /api/admin/messages
+```
+
+The collection includes:
+
+```text
+id
+name
+email
+subject
+message
+is_read
+created_at
+```
+
+Messages are ordered using:
+
+```sql
+ORDER BY created_at DESC
+```
+
+This places the newest contact submissions first.
+
+Both read and unread messages are returned so the future administrator CMS can display and manage the complete inbox.
+
+If no messages exist, the endpoint returns:
+
+```json
+[]
+```
+
+### Individual Message Retrieval
+
+Administrators can retrieve an individual contact message using:
+
+```text
+GET /api/admin/messages/:id
+```
+
+The route validates the message ID before querying PostgreSQL.
+
+The ID must be a positive integer.
+
+Invalid IDs such as:
+
+```text
+/api/admin/messages/abc
+```
+
+return:
+
+```text
+400 Bad Request
+```
+
+If the ID is valid but no corresponding contact message exists, the endpoint returns:
+
+```text
+404 Not Found
+```
+
+This prevents malformed identifiers from reaching PostgreSQL as invalid integer queries.
+
+### Read and Unread Message Updates
+
+Administrators can update the read state of a message using:
+
+```text
+PATCH /api/admin/messages/:id
+```
+
+To mark a message as read:
+
+```json
+{
+  "is_read": true
+}
+```
+
+To return a message to unread:
+
+```json
+{
+  "is_read": false
+}
+```
+
+The API requires `is_read` to be an actual JSON boolean.
+
+For example:
+
+```json
+{
+  "is_read": "true"
+}
+```
+
+is rejected because the value is a string rather than a boolean.
+
+Invalid `is_read` values return:
+
+```text
+400 Bad Request
+```
+
+Successful updates return:
+
+```text
+200 OK
+```
+
+along with the updated contact message.
+
+### Contact Message Deletion
+
+Administrators can permanently delete contact messages using:
+
+```text
+DELETE /api/admin/messages/:id
+```
+
+The message ID is validated before PostgreSQL is queried.
+
+Successful deletion returns:
+
+```text
+200 OK
+```
+
+along with the deleted contact-message data.
+
+If the requested message does not exist, the endpoint returns:
+
+```text
+404 Not Found
+```
+
+Attempting to delete the same message again therefore also returns:
+
+```text
+404 Not Found
+```
+
+Contact-message deletion does not require external asset cleanup because messages are stored entirely in PostgreSQL.
+
+### Phase 8 Verification
+
+Contact-message testing confirmed:
+
+- Public contact submissions return `201 Created`
+- Submitted messages are persisted to PostgreSQL
+- New messages default to `is_read: false`
+- Missing required fields return `400 Bad Request`
+- Whitespace-only required fields return `400 Bad Request`
+- Leading and trailing whitespace is removed before persistence
+- Invalid email addresses return `400 Bad Request`
+- Names longer than 100 characters return `400 Bad Request`
+- Protected administrator message routes reject missing JWTs with `401 Unauthorized`
+- Authenticated administrators can retrieve all contact messages
+- Contact messages are returned newest first
+- Authenticated administrators can retrieve individual contact messages
+- Invalid contact-message IDs return `400 Bad Request`
+- Nonexistent contact messages return `404 Not Found`
+- Contact messages can be marked as read
+- Contact messages can be returned to unread
+- Non-boolean `is_read` values return `400 Bad Request`
+- Contact messages can be deleted
+- Repeated deletion of a removed message returns `404 Not Found`
+- Temporary Phase 8 contact messages were removed after testing
+- The administrator message collection returns an empty array after cleanup
+- Core API regression tests return `200 OK`
+- Database health checks remain successful
+- All 12 seeded technologies remain available
+- Public project retrieval continues to return `200 OK`
+- Authentication regression tests pass
+- Protected routes continue rejecting missing JWTs with `401 Unauthorized`
+- Server JavaScript syntax checks pass
+- `git diff --check` passes
+- React client ESLint passes
+- React client production build passes
+
+### Contact Message Architecture
+
+The completed Phase 8 flow is:
+
+```text
+PUBLIC CONTACT SUBMISSION
+
+Portfolio visitor
+      ↓
+POST /api/contact
+      ↓
+Input normalization
+      ↓
+Required-field validation
+      ↓
+Email validation
+      ↓
+Length validation
+      ↓
+PostgreSQL
+      ↓
+contact_messages
+      ↓
+201 Created
+
+
+ADMIN MESSAGE COLLECTION
+
+Administrator
+      ↓
+JWT
+      ↓
+GET /api/admin/messages
+      ↓
+contact_messages
+      ↓
+Newest first
+      ↓
+Admin inbox
+
+
+ADMIN MESSAGE REVIEW
+
+Administrator
+      ↓
+JWT
+      ↓
+GET /api/admin/messages/:id
+      ↓
+Individual message
+      ↓
+PATCH is_read
+      ↓
+Read / unread state
+
+
+ADMIN MESSAGE DELETION
+
+Administrator
+      ↓
+JWT
+      ↓
+DELETE /api/admin/messages/:id
+      ↓
+PostgreSQL
+      ↓
+Message removed
+```
+
+### Phase 8 Result
+
+**Phase 8 — Contact Messages API is complete.**
+
+The portfolio backend can now:
+
+- Accept public contact-form submissions
+- Normalize visitor contact data
+- Validate required contact fields
+- Validate email formatting
+- Enforce database-compatible input lengths
+- Store contact messages in PostgreSQL
+- Default new messages to unread
+- Retrieve all messages through the protected administrator API
+- Order administrator messages newest first
+- Retrieve individual contact messages
+- Validate contact-message identifiers
+- Mark messages as read
+- Return messages to unread
+- Delete contact messages
+- Protect visitor message data with JWT-authenticated administrator routes
+- Handle invalid and nonexistent messages cleanly
+- Pass backend regression testing
+- Pass React ESLint verification
+- Pass the React production build
+
+With Phases 1–8 complete, the portfolio backend foundation is ready to support the React application.
+
+The project is ready for:
+
+**Phase 9 — React Foundation**
