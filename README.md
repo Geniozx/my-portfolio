@@ -433,7 +433,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 6 — Projects API
 - [x] Phase 7 — Project Images & Cloudinary
 - [x] Phase 8 — Contact Messages API
-- [ ] Phase 9 — React Foundation
+- [x] Phase 9 — React Foundation
 - [ ] Phase 10 — Public Portfolio Shell
 - [ ] Phase 11 — Skills & Projects Integration
 - [ ] Phase 12 — Project Case Study Modal
@@ -800,20 +800,26 @@ The project now has:
 
 ### Phase 9 — React Foundation
 
-**Next**
+**Complete ✅**
 
-Expected:
+The React frontend foundation is now established for both the public portfolio and protected administrator CMS.
 
-- Establish the React application structure for the public portfolio and administrator CMS
-- Configure React Router
-- Create the initial public and administrator route structure
-- Create reusable layout and shared UI foundations
-- Establish API service utilities for communication with the Express backend
-- Configure frontend environment variables for the API base URL
-- Prepare authentication state management for administrator routes
-- Establish the initial responsive styling foundation
-- Verify React-to-Express communication
-- Keep the client ESLint and production build clean
+The application now includes:
+
+- React Router configuration
+- Public and administrator route structures
+- Shared public and administrator layouts
+- Centralized frontend API request utility
+- Environment-based API configuration
+- React-to-Express API integration
+- Administrator authentication state management
+- JWT session persistence
+- Protected administrator routes
+- Administrator login and logout flow
+- Responsive global styling foundation
+- Successful ESLint and production build validation
+
+**Next:** Phase 10 — Public Portfolio Shell
 
 
 
@@ -3569,3 +3575,596 @@ With Phases 1–8 complete, the portfolio backend foundation is ready to support
 The project is ready for:
 
 **Phase 9 — React Foundation**
+
+---
+
+
+## Phase 9 — React Foundation
+
+Phase 9 established the React frontend architecture required for both the public developer portfolio and the protected administrator CMS.
+
+The goal of this phase was not to build the final visual portfolio experience yet. Instead, it created the routing, shared layouts, API communication layer, authentication state management, protected-route system, environment configuration, and responsive CSS foundation that the remaining frontend phases will build upon.
+
+---
+
+### React Router
+
+React Router was added to provide client-side routing throughout the application.
+
+The application now separates the public portfolio from the administrator CMS while keeping both within the same React application.
+
+Current routes include:
+
+```text
+/
+
+/admin/login
+
+/admin
+/admin/projects
+/admin/projects/new
+/admin/projects/:id/edit
+/admin/technologies
+/admin/messages
+/admin/messages/:id
+```
+
+The public route is rendered through the public application layout.
+
+Administrator CMS routes are nested beneath the `/admin` route structure and protected through authentication middleware on the frontend.
+
+The `/admin/login` route intentionally remains outside the protected administrator layout so unauthenticated administrators can access the login page.
+
+---
+
+### Frontend Project Structure
+
+The React application now has a clearer separation between pages, reusable components, authentication state, hooks, and API services.
+
+The frontend structure includes:
+
+```text
+src/
+├── components/
+│   └── shared/
+│       ├── AdminLayout.jsx
+│       ├── ProtectedRoute.jsx
+│       └── PublicLayout.jsx
+│
+├── context/
+│   ├── AuthContext.js
+│   └── AuthProvider.jsx
+│
+├── hooks/
+│   └── useAuth.js
+│
+├── pages/
+│   ├── Home.jsx
+│   └── admin/
+│       ├── AdminDashboard.jsx
+│       ├── AdminLogin.jsx
+│       ├── AdminMessageDetails.jsx
+│       ├── AdminMessages.jsx
+│       ├── AdminProjectForm.jsx
+│       ├── AdminProjects.jsx
+│       └── AdminTechnologies.jsx
+│
+├── services/
+│   ├── api.js
+│   └── authService.js
+│
+├── App.jsx
+├── index.css
+└── main.jsx
+```
+
+This structure provides the foundation for expanding the public portfolio and CMS without placing application logic directly inside the root React components.
+
+---
+
+### Shared Layouts
+
+Reusable layout components were created for the two primary areas of the application:
+
+```text
+PublicLayout
+AdminLayout
+```
+
+`PublicLayout` provides the shared wrapper for public-facing portfolio pages.
+
+`AdminLayout` provides the shared wrapper for authenticated CMS pages and currently contains the administrator logout control.
+
+Both layouts use React Router's `Outlet` to render their nested routes.
+
+This architecture allows navigation, headers, sidebars, footers, and other shared UI elements to be added later without duplicating them across individual pages.
+
+---
+
+### Frontend Environment Configuration
+
+The React application now uses an environment variable to determine the Express API base URL:
+
+```env
+VITE_API_BASE_URL=http://localhost:3000/api
+```
+
+A local `.env` file provides the development configuration and remains excluded from Git.
+
+A safe `.env.example` file documents the required frontend environment configuration without storing private environment values in the repository.
+
+The client `.gitignore` was updated to ignore environment files while allowing `.env.example` to remain tracked.
+
+---
+
+### Centralized API Service
+
+A reusable API request utility was created in:
+
+```text
+src/services/api.js
+```
+
+The utility centralizes communication between React and the Express REST API.
+
+Requests use the configured:
+
+```text
+VITE_API_BASE_URL
+```
+
+with a development fallback to:
+
+```text
+http://localhost:3000/api
+```
+
+This prevents individual React components from repeatedly defining the backend API base URL and provides a shared location for future request behavior.
+
+The request flow is now:
+
+```text
+React Component
+      ↓
+API Service
+      ↓
+Express REST API
+      ↓
+Controller / Database Layer
+      ↓
+PostgreSQL
+```
+
+---
+
+### React-to-Express Integration
+
+Frontend-to-backend communication was verified using the existing API health endpoint:
+
+```text
+GET /api/health
+```
+
+The React client successfully received:
+
+```text
+status: ok
+```
+
+from the Express API.
+
+Because the health endpoint also verifies database connectivity, this confirmed the complete development communication path:
+
+```text
+React
+   ↓
+Express
+   ↓
+PostgreSQL
+```
+
+During integration testing, the active Vite development server was running on port `5174`.
+
+The Express CORS configuration was updated to allow the active client origin, resolving the initial browser CORS rejection.
+
+---
+
+### Authentication Service
+
+Administrator authentication requests are centralized in:
+
+```text
+src/services/authService.js
+```
+
+The authentication service currently provides frontend access to:
+
+```text
+POST /api/auth/login
+GET  /api/auth/me
+```
+
+`loginAdmin()` submits administrator credentials to the Express authentication API.
+
+`getCurrentAdmin()` sends the stored JWT using the Bearer authentication scheme to verify an existing administrator session.
+
+Authentication API logic therefore remains separate from individual React page components.
+
+---
+
+### Authentication Context
+
+Global administrator authentication state was established using React Context.
+
+The authentication system is separated into:
+
+```text
+AuthContext.js
+AuthProvider.jsx
+useAuth.js
+```
+
+`AuthContext` defines the shared authentication context.
+
+`AuthProvider` manages:
+
+```text
+admin
+loading
+login()
+logout()
+```
+
+The provider wraps the React application so authentication state is available throughout the administrator CMS.
+
+The context and provider were intentionally separated into different files to remain compatible with React Fast Refresh and the project's ESLint configuration.
+
+---
+
+### useAuth Hook
+
+A reusable authentication hook was created:
+
+```text
+src/hooks/useAuth.js
+```
+
+Components can access authentication state with:
+
+```text
+useAuth()
+```
+
+instead of importing and consuming `AuthContext` directly.
+
+The hook also verifies that it is being used within `AuthProvider`.
+
+This provides a consistent interface for future administrator components that need access to the authenticated administrator, login state, or logout behavior.
+
+---
+
+### Administrator Login
+
+The administrator login page is now connected to the real Express authentication API.
+
+The login flow is:
+
+```text
+Administrator submits credentials
+            ↓
+POST /api/auth/login
+            ↓
+Express validates credentials
+            ↓
+JWT + administrator returned
+            ↓
+AuthProvider login()
+            ↓
+JWT stored in localStorage
+            ↓
+Administrator state populated
+            ↓
+Navigate to /admin
+```
+
+Successful authentication redirects the administrator to the CMS dashboard.
+
+Invalid credentials are handled by the frontend without granting access to protected routes.
+
+The password itself is never stored by the React application.
+
+---
+
+### Protected Administrator Routes
+
+A reusable `ProtectedRoute` component was created to guard the CMS.
+
+Protected routes include:
+
+```text
+/admin
+/admin/projects
+/admin/projects/new
+/admin/projects/:id/edit
+/admin/technologies
+/admin/messages
+/admin/messages/:id
+```
+
+When an unauthenticated user attempts to access a protected route:
+
+```text
+/admin/*
+    ↓
+ProtectedRoute
+    ↓
+No authenticated administrator
+    ↓
+/admin/login
+```
+
+The login page remains publicly reachable at:
+
+```text
+/admin/login
+```
+
+This protection was verified against the administrator dashboard, projects, technologies, and messages routes.
+
+---
+
+### JWT Session Persistence
+
+Administrator sessions now survive browser refreshes.
+
+When the React application starts, `AuthProvider` checks for the stored administrator JWT.
+
+If a token exists:
+
+```text
+Stored JWT
+    ↓
+AuthProvider
+    ↓
+GET /api/auth/me
+    ↓
+Express verifies JWT
+    ↓
+Administrator returned
+    ↓
+Authentication state restored
+```
+
+During this restoration process, protected routes wait for authentication verification to finish before determining whether the administrator should be allowed access.
+
+Session restoration was successfully tested by refreshing an authenticated administrator route and confirming that the requested CMS page remained accessible.
+
+---
+
+### Invalid or Expired Authentication
+
+If the stored token cannot be authenticated through:
+
+```text
+GET /api/auth/me
+```
+
+the frontend:
+
+```text
+removes adminToken
+      ↓
+clears administrator state
+      ↓
+ProtectedRoute denies CMS access
+```
+
+This prevents an invalid or expired locally stored token from maintaining frontend administrator access.
+
+---
+
+### Administrator Logout
+
+Logout functionality was added to the shared administrator layout.
+
+Logging out:
+
+```text
+removes adminToken from localStorage
+            ↓
+clears administrator state
+            ↓
+redirects to /admin/login
+            ↓
+ProtectedRoute blocks /admin/*
+```
+
+Logout behavior was tested successfully.
+
+After logging out, manually navigating back to `/admin/projects` correctly redirected to `/admin/login`.
+
+---
+
+### Initial Administrator Pages
+
+Placeholder pages now establish the routing targets for the future CMS.
+
+The administrator frontend currently includes:
+
+```text
+Admin Dashboard
+Admin Login
+Projects
+New Project
+Edit Project
+Technologies
+Messages
+Message Details
+```
+
+These pages intentionally contain minimal UI during Phase 9.
+
+Their full CMS interfaces and backend integrations will be developed during later administrator phases.
+
+---
+
+### Public Portfolio Foundation
+
+The root route:
+
+```text
+/
+```
+
+currently provides the initial public portfolio entry point.
+
+The public application remains intentionally minimal during Phase 9.
+
+The full public portfolio shell—including navigation, hero content, About, Skills, Projects, Resume, Contact, responsive navigation, and section behavior—begins in Phase 10.
+
+---
+
+### Responsive Styling Foundation
+
+The default Vite starter styling was replaced with a minimal global styling foundation.
+
+The application now includes:
+
+- global `box-sizing`
+- zeroed body margin
+- minimum viewport dimensions
+- full-height root and layout containers
+- responsive content widths
+- responsive page spacing
+- normalized form-control typography
+- responsive image behavior
+- smooth scrolling
+- system font stack
+- dark portfolio background
+- warm-white primary text
+
+The initial visual foundation uses:
+
+```text
+Background: #0D1117
+Text:       #F5F5F5
+```
+
+This establishes the base for the complete portfolio design system beginning in Phase 10.
+
+---
+
+### Phase 9 Route Verification
+
+The public and administrator route structure was manually tested.
+
+Public:
+
+```text
+/ → Home
+```
+
+Logged out:
+
+```text
+/admin/login        → Admin Login
+/admin              → redirect to /admin/login
+/admin/projects     → redirect to /admin/login
+/admin/technologies → redirect to /admin/login
+/admin/messages     → redirect to /admin/login
+```
+
+Authenticated:
+
+```text
+/admin                       → Admin Dashboard
+/admin/projects              → Projects
+/admin/projects/new          → Project Form
+/admin/projects/1/edit       → Project Form
+/admin/technologies          → Technologies
+/admin/messages              → Messages
+/admin/messages/1            → Message Details
+```
+
+All routes behaved as intended.
+
+---
+
+### Phase 9 Authentication Verification
+
+The complete authentication lifecycle was manually verified:
+
+```text
+Login
+  ↓
+JWT stored
+  ↓
+Protected routes accessible
+  ↓
+Browser refresh
+  ↓
+Session restored
+  ↓
+Logout
+  ↓
+JWT removed
+  ↓
+Protected routes blocked
+```
+
+All authentication behaviors passed.
+
+---
+
+### Phase 9 Code Quality Verification
+
+Frontend linting completed successfully:
+
+```bash
+npm run lint
+```
+
+Production compilation also completed successfully:
+
+```bash
+npm run build
+```
+
+The final production build completed with:
+
+```text
+40 modules transformed
+✓ built successfully
+```
+
+The build produced the expected HTML, CSS, and JavaScript assets without errors.
+
+---
+
+### Phase 9 Result
+
+Phase 9 successfully established the frontend application foundation.
+
+The portfolio now has:
+
+- a structured React application
+- React Router
+- separate public and administrator layouts
+- centralized API communication
+- environment-based backend configuration
+- verified React-to-Express communication
+- global administrator authentication state
+- reusable authentication utilities
+- real administrator login
+- JWT persistence
+- protected CMS routes
+- administrator logout
+- initial public and CMS page structure
+- responsive global CSS foundations
+- successful linting and production builds
+
+With the frontend architecture established, development can now move from application infrastructure into the actual public portfolio experience.
+
+**Phase 9 — React Foundation: Complete**
+
+**Next: Phase 10 — Public Portfolio Shell**
