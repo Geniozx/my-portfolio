@@ -6,6 +6,7 @@ const technologiesRouter = require("./technologies");
 const adminTechnologiesRouter = require("./adminTechnologies");
 const projectsRouter = require("./projects");
 const adminProjectsRouter = require("./adminProjects");
+const projectImagesRouter = require("./projectImages");
 
 const router = express.Router();
 
@@ -21,5 +22,10 @@ router.use("/technologies", technologiesRouter);
 router.use("/admin/technologies", adminTechnologiesRouter);
 router.use("/projects", projectsRouter);
 router.use("/admin/projects", adminProjectsRouter);
+
+router.use(
+  "/admin/projects/:id/images",
+  projectImagesRouter
+);
 
 module.exports = router;

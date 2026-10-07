@@ -1,5 +1,9 @@
 const pool = require("../db/pool");
 
+const {
+  deleteProjectImage,
+} = require("../services/cloudinaryService");
+
 async function getPublishedProjects(req, res, next) {
   try {
     const result = await pool.query(`
@@ -21,7 +25,19 @@ async function getPublishedProjects(req, res, next) {
         featured,
         display_order,
         created_at,
-        updated_at
+        updated_at,
+        (
+          SELECT json_build_object(
+            'id', pi.id,
+            'image_url', pi.image_url,
+            'alt_text', pi.alt_text,
+            'caption', pi.caption
+          )
+          FROM project_images pi
+          WHERE pi.project_id = projects.id
+            AND pi.is_cover = TRUE
+          LIMIT 1
+        ) AS cover_image
       FROM projects
       WHERE published = TRUE
       ORDER BY display_order ASC, created_at DESC
@@ -72,6 +88,27 @@ async function getPublishedProjectBySlug(req, res, next) {
             error: "Project not found.",
         });
     }
+
+    const imageResult = await pool.query(
+      `
+        SELECT
+          id,
+          image_url,
+          alt_text,
+          caption,
+          is_cover,
+          display_order
+        FROM project_images
+        WHERE project_id = $1
+        ORDER BY
+          is_cover DESC,
+          display_order ASC,
+          id ASC
+      `,
+      [project.id]
+    );
+
+    project.images = imageResult.rows;
 
     return res.status(200).json(project);
   } catch (error) {
@@ -152,6 +189,29 @@ async function getProjectById(req, res, next) {
         error: "Project not found.",
       });
     }
+
+    const imageResult = await pool.query(
+      `
+        SELECT
+          id,
+          image_url,
+          public_id,
+          alt_text,
+          caption,
+          is_cover,
+          display_order,
+          created_at
+        FROM project_images
+        WHERE project_id = $1
+        ORDER BY
+          is_cover DESC,
+          display_order ASC,
+          id ASC
+      `,
+      [project.id]
+    );
+
+project.images = imageResult.rows;
 
     return res.status(200).json(project);
   } catch (error) {
@@ -361,25 +421,47 @@ async function deleteProject(req, res, next) {
   const { id } = req.params;
 
   try {
-    const result = await pool.query(
+    const projectResult = await pool.query(
       `
-        DELETE FROM projects
-        WHERE id = $1
-        RETURNING
+        SELECT
           id,
           title,
           slug
+        FROM projects
+        WHERE id = $1
       `,
       [id]
     );
 
-    const project = result.rows[0];
+    const project = projectResult.rows[0];
 
     if (!project) {
       return res.status(404).json({
         error: "Project not found.",
       });
     }
+
+    const imageResult = await pool.query(
+      `
+        SELECT public_id
+        FROM project_images
+        WHERE project_id = $1
+        AND public_id IS NOT NULL
+      `,
+      [id]
+    );
+
+    for (const image of imageResult.rows) {
+      await deleteProjectImage(image.public_id);
+    }
+
+    await pool.query(
+      `
+        DELETE FROM projects
+        WHERE id = $1
+      `,
+      [id]
+    );
 
     return res.status(200).json({
       message: "Project deleted successfully.",

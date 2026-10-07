@@ -431,7 +431,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 4 — Admin Authentication
 - [x] Phase 5 — Technologies API
 - [x] Phase 6 — Projects API
-- [ ] Phase 7 — Project Images & Cloudinary
+- [x] Phase 7 — Project Images & Cloudinary
 - [ ] Phase 8 — Contact Messages API
 - [ ] Phase 9 — React Foundation
 - [ ] Phase 10 — Public Portfolio Shell
@@ -792,9 +792,13 @@ The project now has:
 
 ### Phase 7 — Project Images & Cloudinary
 
+**Complete ✅**
+
+### Phase 8 — Contact Messages API
+
 **Next**
 
-Phase 7 will add project image management and Cloudinary integration so portfolio projects can include cover images, screenshots, captions, alt text, and ordered image galleries.
+Phase 8 will add the portfolio contact-message API so public visitors can submit messages and authenticated administrators can review, manage, mark, and delete submitted messages.
 
 Current backend capabilities include:
 
@@ -2470,4 +2474,542 @@ The portfolio backend can now:
 
 The backend is ready for:
 
-**Phase 7 — Project Images & Cloudinary**
+---
+
+## Phase 7 — Project Images & Cloudinary
+
+Phase 7 introduces project image management and Cloudinary integration.
+
+Portfolio projects can now include cover images and ordered screenshot galleries while image metadata is stored relationally in PostgreSQL.
+
+The image-management flow combines:
+
+```text
+Cloudinary image storage
+        +
+PostgreSQL image metadata
+        +
+Protected administrator image management
+        +
+Public project image responses
+```
+
+### Cloudinary Integration
+
+Cloudinary is used to store portfolio project images outside the application server.
+
+Cloudinary configuration is managed through:
+
+```text
+server/config/cloudinary.js
+```
+
+Private Cloudinary credentials are stored in:
+
+```text
+server/.env
+```
+
+Safe placeholders are documented in:
+
+```text
+server/.env.example
+```
+
+The application uses the dedicated Cloudinary folder:
+
+```text
+my-portfolio/projects
+```
+
+Cloudinary upload and deletion operations are handled through:
+
+```text
+server/services/cloudinaryService.js
+```
+
+The service supports:
+
+- Uploading project images from memory
+- Returning Cloudinary image metadata
+- Deleting Cloudinary assets using their `public_id`
+
+### Image Upload Middleware
+
+Project image uploads are processed using Multer.
+
+Upload middleware is defined in:
+
+```text
+server/middleware/upload.js
+```
+
+Uploads use in-memory storage so image buffers can be streamed directly to Cloudinary without creating permanent files on the application server.
+
+Accepted image formats are:
+
+```text
+JPEG
+PNG
+WebP
+```
+
+The maximum image size is:
+
+```text
+10 MB
+```
+
+Invalid file types return:
+
+```text
+400 Bad Request
+```
+
+Files larger than the configured limit return:
+
+```text
+413 Payload Too Large
+```
+
+Multer upload errors are handled by the centralized Express error middleware.
+
+### Project Image Database Metadata
+
+Image metadata is stored in the existing:
+
+```text
+project_images
+```
+
+table.
+
+Each image can store:
+
+```text
+project_id
+image_url
+public_id
+alt_text
+caption
+is_cover
+display_order
+created_at
+```
+
+`image_url` stores the Cloudinary delivery URL.
+
+`public_id` stores the Cloudinary asset identifier used for server-side asset deletion.
+
+### Cover Image Constraint
+
+Each project can have at most one image marked as its cover.
+
+The database enforces this rule using a PostgreSQL partial unique index:
+
+```sql
+CREATE UNIQUE INDEX unique_project_cover_image
+ON project_images (project_id)
+WHERE is_cover = TRUE;
+```
+
+The API also manages cover replacement transactionally.
+
+When an administrator promotes an image to cover:
+
+```text
+Current cover
+      ↓
+is_cover = FALSE
+      ↓
+Selected image
+      ↓
+is_cover = TRUE
+```
+
+This prevents multiple cover images from remaining assigned to the same project.
+
+### Protected Project Image Routes
+
+Project image management is nested beneath administrator projects.
+
+Protected routes:
+
+```text
+POST   /api/admin/projects/:id/images
+PATCH  /api/admin/projects/:id/images/:imageId
+DELETE /api/admin/projects/:id/images/:imageId
+```
+
+All project image routes require:
+
+```text
+Authorization: Bearer <token>
+```
+
+The existing JWT middleware protects the image-management router.
+
+### Project Image Creation
+
+Administrators can upload project images using:
+
+```text
+POST /api/admin/projects/:id/images
+```
+
+The request uses multipart form data with the image field:
+
+```text
+image
+```
+
+Optional metadata includes:
+
+```text
+alt_text
+caption
+is_cover
+display_order
+```
+
+Before uploading an image, the API verifies that the target project exists.
+
+`display_order` must be a non-negative integer.
+
+After Cloudinary successfully stores the asset, PostgreSQL stores the corresponding image metadata.
+
+If the database operation fails after the Cloudinary upload, the newly uploaded Cloudinary asset is deleted to prevent an orphaned file.
+
+### Project Image Updates
+
+Administrators can update image metadata using:
+
+```text
+PATCH /api/admin/projects/:id/images/:imageId
+```
+
+Supported fields are:
+
+```text
+alt_text
+caption
+is_cover
+display_order
+```
+
+Updates verify that the image belongs to the requested project.
+
+An empty request containing no valid fields returns:
+
+```text
+400 Bad Request
+```
+
+Invalid display-order values also return:
+
+```text
+400 Bad Request
+```
+
+Attempting to update an image that does not belong to the project returns:
+
+```text
+404 Not Found
+```
+
+Promoting an image to cover automatically removes the previous project's cover designation inside the same PostgreSQL transaction.
+
+### Project Image Deletion
+
+Administrators can delete project images using:
+
+```text
+DELETE /api/admin/projects/:id/images/:imageId
+```
+
+Image deletion removes both:
+
+```text
+Cloudinary asset
+        +
+PostgreSQL project_images row
+```
+
+The image is first located using both its image ID and project ID.
+
+If the image does not exist for that project, the endpoint returns:
+
+```text
+404 Not Found
+```
+
+### Administrator Project Image Data
+
+The protected administrator project endpoint:
+
+```text
+GET /api/admin/projects/:id
+```
+
+includes an ordered:
+
+```text
+images[]
+```
+
+array.
+
+This allows the future administrator CMS to retrieve image data for both published and unpublished projects.
+
+Administrator image data includes:
+
+```text
+id
+image_url
+public_id
+alt_text
+caption
+is_cover
+display_order
+created_at
+```
+
+Including `public_id` is intentional on the protected administrator API because it represents server-managed Cloudinary asset metadata.
+
+### Public Project Cover Images
+
+The public project collection:
+
+```text
+GET /api/projects
+```
+
+now includes a project's cover image through:
+
+```text
+cover_image
+```
+
+The public cover object contains:
+
+```text
+id
+image_url
+alt_text
+caption
+```
+
+Projects without a cover image return:
+
+```json
+"cover_image": null
+```
+
+Cloudinary `public_id` values are intentionally excluded from public API responses.
+
+### Public Project Image Galleries
+
+The public single-project endpoint:
+
+```text
+GET /api/projects/:slug
+```
+
+now includes:
+
+```text
+images[]
+```
+
+for the published project's screenshot gallery.
+
+Public gallery image data contains:
+
+```text
+id
+image_url
+alt_text
+caption
+is_cover
+display_order
+```
+
+Images are ordered using:
+
+```sql
+ORDER BY
+  is_cover DESC,
+  display_order ASC,
+  id ASC
+```
+
+This places the cover image first and then respects administrator-defined image ordering.
+
+Projects without images return:
+
+```json
+"images": []
+```
+
+Cloudinary `public_id` values are not exposed publicly.
+
+### Project Deletion and Cloudinary Cleanup
+
+Deleting an entire project now cleans up its Cloudinary assets before deleting the PostgreSQL project record.
+
+The project deletion flow is:
+
+```text
+Administrator deletes project
+        ↓
+Load project image public IDs
+        ↓
+Delete Cloudinary assets
+        ↓
+Delete project
+        ↓
+PostgreSQL ON DELETE CASCADE
+        ↓
+Remove project_images rows
+```
+
+Cloudinary and PostgreSQL are separate systems and therefore cannot share a single database transaction.
+
+The current deletion strategy removes Cloudinary assets before deleting the project record so normal project deletion does not leave project images orphaned in Cloudinary.
+
+### Phase 7 Verification
+
+Project image and Cloudinary testing confirmed:
+
+- Cloudinary credentials load successfully from the private environment configuration
+- Cloudinary API connectivity succeeds
+- Project images upload successfully to the dedicated Cloudinary folder
+- Uploaded image metadata is persisted to PostgreSQL
+- Cover-image replacement leaves exactly one project cover
+- Promoting an existing image to cover demotes the previous cover
+- Image metadata updates return `200 OK`
+- Empty image PATCH requests return `400 Bad Request`
+- Negative `display_order` values return `400 Bad Request`
+- Updating a nonexistent project image returns `404 Not Found`
+- Individual image deletion returns `200 OK`
+- Deleted image rows are removed from PostgreSQL
+- Deleted image assets are removed from Cloudinary
+- Repeated deletion of a removed image returns `404 Not Found`
+- Invalid image file types return `400 Bad Request`
+- Images larger than 10 MB return `413 Payload Too Large`
+- Public project collections return `cover_image`
+- Projects without cover images return `cover_image: null`
+- Public project details return ordered `images[]`
+- Projects without images return an empty `images[]` array
+- Public project responses do not expose Cloudinary `public_id`
+- Protected administrator project details include image-management data
+- Administrator project image data includes Cloudinary `public_id`
+- Deleting a project removes its associated Cloudinary assets
+- PostgreSQL cascade deletion removes associated project image rows
+- Temporary Phase 7 projects and image assets were removed after testing
+- Core API regression tests return `200 OK`
+- Database health checks remain successful
+- Authentication regression tests pass
+- Protected routes continue rejecting missing JWTs with `401 Unauthorized`
+- Server JavaScript syntax checks pass
+- `git diff --check` passes
+- React client ESLint passes
+- React client production build passes
+
+### Project Image Architecture
+
+The completed Phase 7 flow is:
+
+```text
+ADMIN IMAGE UPLOAD
+
+Administrator
+      ↓
+JWT
+      ↓
+Multer
+      ↓
+File validation
+      ↓
+Memory buffer
+      ↓
+Cloudinary
+      ↓
+PostgreSQL transaction
+      ↓
+project_images
+
+
+PUBLIC PROJECT COLLECTION
+
+React portfolio
+      ↓
+GET /api/projects
+      ↓
+Published projects
+      ↓
+Cover image lookup
+      ↓
+cover_image
+
+
+PUBLIC PROJECT CASE STUDY
+
+React portfolio
+      ↓
+GET /api/projects/:slug
+      ↓
+Published project
+      ↓
+Ordered project_images
+      ↓
+images[]
+
+
+PROJECT DELETION
+
+Administrator
+      ↓
+JWT
+      ↓
+DELETE project
+      ↓
+Cloudinary asset cleanup
+      ↓
+PostgreSQL project deletion
+      ↓
+ON DELETE CASCADE
+      ↓
+Image metadata cleanup
+```
+
+### Phase 7 Result
+
+**Phase 7 — Project Images & Cloudinary is complete.**
+
+The portfolio backend can now:
+
+- Upload project images to Cloudinary
+- Validate image formats and upload sizes
+- Store project image metadata in PostgreSQL
+- Assign image alt text and captions
+- Control image display order
+- Maintain a single cover image per project
+- Update project image metadata
+- Delete individual project images
+- Remove deleted image assets from Cloudinary
+- Expose cover images through the public project collection
+- Expose ordered galleries through public project details
+- Keep Cloudinary `public_id` metadata out of public responses
+- Provide complete image-management data to the protected administrator API
+- Clean Cloudinary assets when entire projects are deleted
+- Preserve PostgreSQL relational cleanup through cascading foreign keys
+- Reuse the existing JWT authentication system for image management
+- Handle Multer errors through centralized Express error handling
+- Pass backend regression testing
+- Pass React ESLint verification
+- Pass the React production build
+
+The backend is ready for:
+
+**Phase 8 — Contact Messages API**

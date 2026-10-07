@@ -72,6 +72,10 @@ CREATE TABLE project_images (
     ON DELETE CASCADE
 );
 
+CREATE UNIQUE INDEX unique_project_cover_image
+ON project_images (project_id)
+WHERE is_cover = TRUE;
+
 
 CREATE TABLE contact_messages (
   id SERIAL PRIMARY KEY,
