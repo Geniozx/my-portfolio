@@ -802,33 +802,43 @@ The project now has:
 
 **Complete ✅**
 
-### Phase 10 — React Foundation
+### Phase 10 — Public Portfolio Shell
 
 **Complete ✅**
 
-The public portfolio is now established as a polished, responsive single-page experience built around the project's dark charcoal/navy and amber/gold visual system.
+### Phase 11 — Skills & Projects Integration
+
+**Complete ✅**
+
+The temporary frontend data used by the Skills and Projects sections has now been replaced with live data from the Express/PostgreSQL API.
 
 The application now includes:
 
-- Sticky responsive navigation
-- Mobile hamburger navigation
-- Smooth section-based scrolling
-- Active navigation highlighting
-- Responsive Hero section
-- About section with core development stack
-- Categorized Skills presentation
-- Three-card Projects presentation
-- Professional Resume summary
-- Responsive Contact form shell
-- Polished responsive Footer
-- Desktop and mobile responsive behavior
-- Shared reusable design tokens and UI styling
+- Database-backed Skills section
+- Live technology data from `GET /api/technologies`
+- Technology grouping by category
+- Skills loading, error, and empty states
+- Database-backed Projects section
+- Live published project data from `GET /api/projects`
+- Project-to-technology relationships
+- Technology data included with public project responses
+- Three published portfolio projects
+- Database-driven project titles, types, descriptions, and technologies
+- Project cover-image support with fallback visuals
+- Projects loading, error, and empty states
+- Desktop and mobile API integration
+- Simultaneous localhost and local-network development support
+- Updated development CORS configuration
+- Full desktop and mobile regression testing
 - Successful ESLint validation
+- Successful Node syntax validation
 - Successful Vite production build validation
 
-The public portfolio currently uses temporary frontend data for the Skills and Projects sections. The backend APIs and PostgreSQL data required to make these sections dynamic are already established.
+The Skills and Projects sections are now fully connected to the application's PostgreSQL data layer while preserving the responsive design established during Phase 10.
 
-**Next:** Phase 11 — Skills & Projects Integration
+The View Case Study controls remain intentionally inactive until the next phase.
+
+**Next:** Phase 12 — Project Case Study Modal
 
 
 
@@ -4178,7 +4188,7 @@ With the frontend architecture established, development can now move from applic
 
 ---
 
-## Phase 10 — Public Portfolio Shell ✅
+## Phase 10 — Public Portfolio Shell
 
 Phase 10 established the complete public-facing visual shell for the developer portfolio.
 
@@ -4508,3 +4518,453 @@ Production build             ✅
 Phase 10 establishes the complete public portfolio presentation layer.
 
 Phase 11 will replace the temporary Skills and Projects frontend data with live data from the existing Express/PostgreSQL API.
+
+
+**Phase 10 — React Foundation: Complete**
+
+
+---
+
+## Phase 11 — Skills & Projects Integration
+
+Phase 11 replaced the temporary frontend data used by the Skills and Projects sections with live data from the existing Express/PostgreSQL API.
+
+The public portfolio now retrieves technologies and published projects directly from PostgreSQL while preserving the responsive visual presentation established during Phase 10.
+
+This phase also expanded the public Projects API response so each project can provide its associated technologies and prepared the project-card interface for database-managed cover images.
+
+### Technologies Service
+
+A dedicated frontend technology service was added:
+
+```text
+client/src/services/technologyService.js
+```
+
+The service communicates with:
+
+```text
+GET /api/technologies
+```
+
+and provides the Skills section with technology records stored in PostgreSQL.
+
+The technology data flow is now:
+
+```text
+PostgreSQL
+    ↓
+Express Technologies API
+    ↓
+technologyService.js
+    ↓
+Skills.jsx
+    ↓
+Public Portfolio
+```
+
+### Skills API Integration
+
+The Skills section was converted from temporary hardcoded frontend data to live API data.
+
+`Skills.jsx` now:
+
+- Fetches technologies when the component loads
+- Stores technologies in React state
+- Tracks loading state
+- Tracks API errors
+- Handles an empty technology collection
+- Groups technologies by category
+- Renders technology names directly from PostgreSQL
+
+The existing category order is preserved:
+
+#### Languages
+
+- JavaScript
+- Python
+
+#### Frontend
+
+- React
+- HTML
+- CSS
+
+#### Backend
+
+- Node.js
+- Express
+- Django
+- Django REST Framework
+
+#### Database
+
+- PostgreSQL
+
+#### Tools
+
+- Git
+- GitHub
+
+All twelve technologies now originate from the database rather than a hardcoded React array.
+
+The visual design established during Phase 10 was preserved, including:
+
+- Five categorized skill cards
+- Three-column primary desktop row
+- Centered secondary desktop row
+- Two-column tablet layout
+- Single-column mobile layout
+- Technology badges
+- Existing responsive behavior
+
+### Skills Loading, Error & Empty States
+
+The Skills section now handles multiple API states.
+
+While technology data is loading, the section displays a loading message.
+
+If the API request fails, an error state is displayed.
+
+If the API successfully responds with no technologies, an empty-state message is displayed.
+
+Once technology data is available, the existing Skills grid is rendered.
+
+### Development Network API Access
+
+During mobile testing, the portfolio frontend was successfully accessible from the local network, but API requests initially failed because the client API URL used:
+
+```text
+http://localhost:3000/api
+```
+
+On a mobile device, `localhost` refers to the mobile device itself rather than the development computer.
+
+The local client environment was updated to use the development machine's LAN address for API requests during device testing.
+
+Direct mobile access to the public technologies API was verified before reconnecting the React application.
+
+### Development CORS Configuration
+
+After enabling network API access, the mobile portfolio successfully retrieved technologies while the desktop localhost origin was blocked by the existing CORS configuration.
+
+The Express CORS configuration was updated to support both development origins:
+
+```text
+Desktop localhost origin
+        ↓
+      Express
+
+Local network mobile origin
+        ↓
+      Express
+```
+
+The development server now supports simultaneous desktop and mobile testing without switching the allowed frontend origin back and forth.
+
+Both devices successfully retrieve live technology data from the same Express API.
+
+### Projects Service
+
+A dedicated frontend project service was added:
+
+```text
+client/src/services/projectService.js
+```
+
+The service communicates with:
+
+```text
+GET /api/projects
+```
+
+and provides the Projects section with published project records stored in PostgreSQL.
+
+The project data flow is now:
+
+```text
+PostgreSQL
+    ↓
+Express Projects API
+    ↓
+projectService.js
+    ↓
+Projects.jsx
+    ↓
+Public Portfolio
+```
+
+### Initial Published Portfolio Projects
+
+Three initial portfolio projects were added to PostgreSQL through the protected Projects API.
+
+The published project order is:
+
+1. VinoVault 2.0
+2. You Party – I Pour
+3. JavaScript Snake
+
+Each project includes database-managed information such as:
+
+- Title
+- Slug
+- Short description
+- Full description
+- Project type
+- Project status
+- Featured state
+- Published state
+- Display order
+- Creation timestamp
+- Update timestamp
+
+These records replace the temporary project objects previously stored directly inside `Projects.jsx`.
+
+### VinoVault 2.0
+
+VinoVault 2.0 was added as a published and featured full-stack application.
+
+Its project technologies are connected through the `project_technologies` relationship.
+
+Associated technologies include:
+
+- JavaScript
+- Python
+- React
+- Django
+- Django REST Framework
+- PostgreSQL
+- Git
+- GitHub
+
+### You Party – I Pour
+
+You Party – I Pour was added as a published and featured client web application.
+
+Associated technologies include:
+
+- JavaScript
+- React
+- Node.js
+- Express
+- PostgreSQL
+- Git
+- GitHub
+
+### JavaScript Snake
+
+JavaScript Snake was added as a published and featured frontend project.
+
+Associated technologies include:
+
+- JavaScript
+- HTML
+- CSS
+- Git
+- GitHub
+
+### Public Projects API Enhancement
+
+The existing public Projects endpoint previously returned project information and an optional cover image.
+
+During Phase 11, the endpoint was expanded so each published project also returns its associated technologies.
+
+The public project collection now follows this structure:
+
+```text
+Project
+├── Core project information
+├── Cover image
+└── Technologies
+    ├── Technology
+    ├── Technology
+    └── Technology
+```
+
+Technology records are retrieved through the existing relational structure:
+
+```text
+projects
+    ↓
+project_technologies
+    ↓
+technologies
+```
+
+This allows the React client to retrieve the project and the technology badges required for its card through a single public Projects API request.
+
+### Project Technology Relationships
+
+Technology relationships were assigned through the protected endpoint:
+
+```text
+PUT /api/admin/projects/:id/technologies
+```
+
+The public Projects API was then verified to return the correct technology array for each published project.
+
+This keeps project technology information relational rather than duplicating technology names directly inside project records.
+
+### Projects API Integration
+
+The Projects section was converted from the Phase 10 placeholder array to live API data.
+
+`Projects.jsx` now:
+
+- Fetches published projects when the component loads
+- Stores projects in React state
+- Tracks loading state
+- Tracks API errors
+- Handles an empty project collection
+- Renders project types from PostgreSQL
+- Renders project titles from PostgreSQL
+- Renders short descriptions from PostgreSQL
+- Renders associated technology badges from PostgreSQL
+- Supports project cover images
+- Preserves the existing View Case Study control
+
+The hardcoded Phase 10 project array is no longer used.
+
+### Project Cover Image Support
+
+The public Projects API already supports a `cover_image` field.
+
+The Projects component now checks whether a project has a cover image.
+
+The rendering flow is:
+
+```text
+Project has cover image?
+        ↓
+      Yes
+        ↓
+Render project image
+
+Project has cover image?
+        ↓
+       No
+        ↓
+Render existing </> project visual
+```
+
+The three initial projects currently use the existing fallback project visual because portfolio cover images have not yet been assigned.
+
+This allows cover images to be added later without redesigning the project-card component.
+
+### Projects Loading, Error & Empty States
+
+The Projects section now handles multiple API states.
+
+While projects are loading, the section displays a loading message.
+
+If the API request fails, an error state is displayed.
+
+If the API successfully responds with no published projects, an empty-state message is displayed.
+
+Once project data is available, the responsive Projects grid is rendered.
+
+### Responsive Integration Testing
+
+Both API-driven sections were manually tested on desktop and mobile.
+
+Skills testing confirmed:
+
+- All five technology categories render
+- All twelve technologies render
+- Technology data reloads correctly
+- Desktop layout remains intact
+- Mobile layout remains intact
+
+Projects testing confirmed:
+
+- All three published projects render
+- Correct project ordering
+- Correct project types
+- Correct descriptions
+- Correct technology relationships
+- Existing fallback project visuals
+- Desktop three-column layout
+- Mobile single-column layout
+
+The complete public portfolio was also tested from top to bottom after the integrations.
+
+Verified sections include:
+
+- Navbar
+- Hero
+- About
+- Skills
+- Projects
+- Resume
+- Contact
+- Footer
+
+No observed horizontal overflow, overlapping content, or broken responsive spacing was introduced by the API integrations.
+
+The View Case Study controls remain intentionally inactive.
+
+Project case-study modal functionality will be implemented during Phase 12.
+
+### Phase 11 Validation
+
+Backend validation completed successfully.
+
+Verified behavior includes:
+
+- Public technologies endpoint
+- Public projects endpoint
+- Published-project filtering
+- Project display ordering
+- Project technology relationships
+- Public project technology serialization
+- Project cover-image field
+- Desktop API access
+- Mobile API access
+- Simultaneous desktop and mobile CORS support
+- Project controller syntax validation
+
+Client validation completed successfully:
+
+```bash
+npm run lint
+npm run build
+```
+
+The final Phase 11 production build completed successfully with Vite.
+
+The build transformed 50 modules and completed without errors.
+
+### Phase 11 Status
+
+```text
+Technology service              ✅
+Skills API integration          ✅
+Skills category grouping        ✅
+Skills loading state            ✅
+Skills error state              ✅
+Skills empty state              ✅
+Project service                 ✅
+Published project records       ✅
+Project technology relations    ✅
+Projects API enhancement        ✅
+Projects API integration        ✅
+Project cover-image support     ✅
+Projects loading state          ✅
+Projects error state            ✅
+Projects empty state            ✅
+Desktop API access              ✅
+Mobile API access               ✅
+Development CORS support        ✅
+Desktop responsive testing      ✅
+Mobile responsive testing       ✅
+Full-page regression testing    ✅
+Node syntax validation          ✅
+ESLint                          ✅
+Production build                ✅
+```
+
+Phase 11 completes the transition of the Skills and Projects sections from temporary frontend content to live PostgreSQL-backed portfolio data.
+
+The public portfolio presentation is now connected to the application data layer while retaining the visual system and responsive behavior established during Phase 10.
+
+Phase 12 will build the interactive Project Case Study Modal, allowing visitors to explore individual projects in greater detail without leaving the single-page portfolio.

@@ -1,28 +1,26 @@
-const projectPlaceholders = [
-  {
-    title: "VinoVault 2.0",
-    type: "Full-Stack Application",
-    description:
-      "A wine collection and tasting journal application built with React, Django REST Framework, and PostgreSQL.",
-    technologies: ["React", "Python", "Django REST Framework", "PostgreSQL"],
-  },
-  {
-    title: "You Party – I Pour",
-    type: "Client Web Application",
-    description:
-      "A full-stack mobile bartending service platform with booking requests, availability management, gallery media, and an administrator dashboard.",
-    technologies: ["React", "Node.js", "Express", "PostgreSQL"],
-  },
-  {
-    title: "JavaScript Snake",
-    type: "Frontend Project",
-    description:
-      "A browser-based implementation of the classic Snake game built with vanilla JavaScript, HTML, and CSS.",
-    technologies: ["JavaScript", "HTML", "CSS"],
-  },
-];
+import { useEffect, useState } from "react";
+import { getProjects } from "../../services/projectService.js";
 
 function Projects() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadProjects() {
+      try {
+        const data = await getProjects();
+        setProjects(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProjects();
+  }, []);
+
   return (
     <section id="projects" className="portfolio-section projects-section">
       <div className="section-container">
@@ -41,38 +39,79 @@ function Projects() {
           </p>
         </div>
 
-        <div className="projects-grid">
-          {projectPlaceholders.map((project) => (
-            <article className="project-card" key={project.title}>
-              <div className="project-card-visual" aria-hidden="true">
-                <span>{project.type}</span>
+        {loading && (
+          <p className="section-status">
+            Loading projects...
+          </p>
+        )}
 
-                <div className="project-card-symbol">&lt;/&gt;</div>
-              </div>
+        {!loading && error && (
+          <p className="section-status section-error">
+            {error}
+          </p>
+        )}
 
-              <div className="project-card-content">
-                <p className="project-type">{project.type}</p>
+        {!loading && !error && projects.length === 0 && (
+          <p className="section-status">
+            No projects available.
+          </p>
+        )}
 
-                <h3>{project.title}</h3>
+        {!loading && !error && projects.length > 0 && (
+          <div className="projects-grid">
+            {projects.map((project) => (
+              <article className="project-card" key={project.id}>
+                <div className="project-card-visual">
+                  {project.cover_image ? (
+                    <img
+                      src={project.cover_image.image_url}
+                      alt={
+                        project.cover_image.alt_text ||
+                        `${project.title} project cover`
+                      }
+                    />
+                  ) : (
+                    <>
+                      <span>{project.project_type}</span>
 
-                <p className="project-description">
-                  {project.description}
-                </p>
-
-                <div className="project-technologies">
-                  {project.technologies.map((technology) => (
-                    <span key={technology}>{technology}</span>
-                  ))}
+                      <div
+                        className="project-card-symbol"
+                        aria-hidden="true"
+                      >
+                        &lt;/&gt;
+                      </div>
+                    </>
+                  )}
                 </div>
 
-                <button className="project-link" type="button">
-                  View Case Study
-                  <span aria-hidden="true">→</span>
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+                <div className="project-card-content">
+                  <p className="project-type">
+                    {project.project_type}
+                  </p>
+
+                  <h3>{project.title}</h3>
+
+                  <p className="project-description">
+                    {project.short_description}
+                  </p>
+
+                  <div className="project-technologies">
+                    {project.technologies.map((technology) => (
+                      <span key={technology.id}>
+                        {technology.name}
+                      </span>
+                    ))}
+                  </div>
+
+                  <button className="project-link" type="button">
+                    View Case Study
+                    <span aria-hidden="true">→</span>
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

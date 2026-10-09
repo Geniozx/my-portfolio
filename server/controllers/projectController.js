@@ -37,7 +37,26 @@ async function getPublishedProjects(req, res, next) {
           WHERE pi.project_id = projects.id
             AND pi.is_cover = TRUE
           LIMIT 1
-        ) AS cover_image
+        ) AS cover_image,
+        COALESCE(
+          (
+            SELECT json_agg(
+              json_build_object(
+                'id', t.id,
+                'name', t.name,
+                'category', t.category,
+                'icon_url', t.icon_url,
+                'display_order', t.display_order
+              )
+              ORDER BY t.display_order ASC, t.name ASC
+            )
+            FROM project_technologies pt
+            JOIN technologies t
+              ON t.id = pt.technology_id
+            WHERE pt.project_id = projects.id
+          ),
+          '[]'::json
+        ) AS technologies
       FROM projects
       WHERE published = TRUE
       ORDER BY display_order ASC, created_at DESC
