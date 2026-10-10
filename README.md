@@ -435,8 +435,8 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 8 — Contact Messages API
 - [x] Phase 9 — React Foundation
 - [x] Phase 10 — Public Portfolio Shell
-- [ ] Phase 11 — Skills & Projects Integration
-- [ ] Phase 12 — Project Case Study Modal
+- [x] Phase 11 — Skills & Projects Integration
+- [x] Phase 12 — Project Case Study Modal
 - [ ] Phase 13 — Resume & Contact
 - [ ] Phase 14 — Admin CMS Foundation
 - [ ] Phase 15 — Project Management CMS
@@ -810,35 +810,47 @@ The project now has:
 
 **Complete ✅**
 
-The temporary frontend data used by the Skills and Projects sections has now been replaced with live data from the Express/PostgreSQL API.
+### Phase 12 — Project Case Study Modal
+
+**Complete ✅**
+
+The Projects section now includes interactive, API-driven project case studies that allow visitors to explore individual projects without leaving the single-page portfolio.
 
 The application now includes:
 
-- Database-backed Skills section
-- Live technology data from `GET /api/technologies`
-- Technology grouping by category
-- Skills loading, error, and empty states
-- Database-backed Projects section
-- Live published project data from `GET /api/projects`
-- Project-to-technology relationships
-- Technology data included with public project responses
-- Three published portfolio projects
-- Database-driven project titles, types, descriptions, and technologies
-- Project cover-image support with fallback visuals
-- Projects loading, error, and empty states
-- Desktop and mobile API integration
-- Simultaneous localhost and local-network development support
-- Updated development CORS configuration
-- Full desktop and mobile regression testing
+- Reusable Project Case Study Modal
+- Project detail fetching through `GET /api/projects/:slug`
+- Database-driven case-study content
+- Project overview, problem, solution, features, challenges, and lessons learned
+- Project type and status metadata
+- Database-backed technology stacks
+- Conditional GitHub and live-site links
+- Cloudinary-backed project cover images
+- Responsive project screenshot galleries
+- Image captions and accessible alt text
+- Conditional rendering for optional project content
+- Internal modal scrolling
+- Background body scroll locking
+- Escape-key closing
+- Backdrop-click closing
+- Close-button support
+- Keyboard focus trapping
+- Focus restoration to the originating View Case Study button
+- VinoVault 2.0 complete case study
+- You Party – I Pour complete case study content
+- Venom-Sprint complete case study
+- VinoVault project cover and screenshot gallery
+- Venom-Sprint project cover
+- Cloudinary upload, deletion, and replacement workflow validation
+- Desktop and mobile responsive testing
 - Successful ESLint validation
-- Successful Node syntax validation
 - Successful Vite production build validation
 
-The Skills and Projects sections are now fully connected to the application's PostgreSQL data layer while preserving the responsive design established during Phase 10.
+The Projects section now provides a complete case-study experience while preserving the single-page portfolio navigation and responsive design.
 
-The View Case Study controls remain intentionally inactive until the next phase.
+Additional project images can be managed later through the Admin CMS.
 
-**Next:** Phase 12 — Project Case Study Modal
+**Next:** Phase 13 — Resume & Contact
 
 
 
@@ -4968,3 +4980,354 @@ Phase 11 completes the transition of the Skills and Projects sections from tempo
 The public portfolio presentation is now connected to the application data layer while retaining the visual system and responsive behavior established during Phase 10.
 
 Phase 12 will build the interactive Project Case Study Modal, allowing visitors to explore individual projects in greater detail without leaving the single-page portfolio.
+
+
+
+---
+
+## Phase 12 — Project Case Study Modal
+
+Phase 12 transformed the Projects section from a collection of summary cards into an interactive portfolio case-study experience.
+
+Visitors can now open a detailed project case study directly from the single-page portfolio without navigating away from the page or losing their current scroll position.
+
+### Project Detail API Integration
+
+The client project service was expanded with support for retrieving an individual published project by slug:
+
+```text
+GET /api/projects/:slug
+```
+
+The public project-detail response now includes:
+
+- Core project information
+- Full case-study content
+- Project type
+- Project status
+- GitHub URL
+- Live URL
+- Associated technologies
+- Ordered project images
+
+The public response does not expose Cloudinary `public_id` values.
+
+This allows the case-study modal to retrieve all information required to present an individual project through a single public API request.
+
+### Project Case Study Modal
+
+A reusable `ProjectCaseStudyModal` component was added to the public portfolio.
+
+Selecting View Case Study on a project card now:
+
+```text
+Project Card
+     ↓
+View Case Study
+     ↓
+Fetch project by slug
+     ↓
+Open ProjectCaseStudyModal
+     ↓
+Render complete project case study
+```
+
+The modal displays available project information including:
+
+- Cover image
+- Project title
+- Project type
+- Project status
+- Short description
+- Overview
+- Problem
+- Solution
+- Features
+- Challenges
+- Lessons learned
+- Technology stack
+- GitHub link
+- Live-site link
+- Project gallery
+
+Optional content is rendered conditionally so projects without a cover image, live URL, or gallery do not display empty interface sections.
+
+### Modal Interaction & Accessibility
+
+The case-study modal was designed to preserve the single-page portfolio experience.
+
+Implemented interaction behavior includes:
+
+- Internal modal scrolling
+- Background body scroll locking
+- Escape-key closing
+- Close-button support
+- Backdrop-click closing
+- Initial focus on the modal close button
+- Keyboard focus trapping while the modal is open
+- Focus restoration to the originating View Case Study button after closing
+
+The modal can therefore be opened and closed without changing routes or losing the visitor's position in the Projects section.
+
+### Project Metadata
+
+Project type and development status are displayed as structured metadata inside the modal.
+
+Examples include:
+
+```text
+Type
+Full-Stack Application
+
+Status
+In Development
+```
+
+These values are retrieved from PostgreSQL rather than being hardcoded in the React component.
+
+This allows future Admin CMS updates to project type or status to automatically appear on the public portfolio.
+
+### Project Links
+
+Case studies support conditional external project links.
+
+Available actions include:
+
+- View GitHub
+- View Live Site
+
+Links open in a new browser tab and use `noopener noreferrer`.
+
+Buttons are only rendered when the corresponding URL exists.
+
+This prevents unfinished projects from displaying inactive or placeholder actions.
+
+### Project Cover Images
+
+Phase 12 verified the complete project-cover pipeline:
+
+```text
+Image Upload
+     ↓
+Express / Multer
+     ↓
+Cloudinary
+     ↓
+PostgreSQL Metadata
+     ↓
+Public Projects API
+     ↓
+React Project Card
+     ↓
+Case Study Modal
+```
+
+Real cover images were assigned to:
+
+- VinoVault 2.0
+- Venom-Sprint
+
+Cover images now replace the fallback project visual on their project cards and are also displayed prominently inside their case-study modals.
+
+Projects without a cover image continue to use the existing fallback visual.
+
+### Project Gallery
+
+The case-study modal now supports ordered project screenshot galleries.
+
+Gallery images:
+
+- Exclude the project's cover image
+- Respect database `display_order`
+- Display in a responsive two-column desktop grid
+- Collapse to a single-column layout on mobile
+- Support descriptive alt text
+- Support optional captions
+
+The Project Gallery section is rendered only when non-cover project images exist.
+
+This prevents empty gallery headings from appearing on projects without screenshots.
+
+### VinoVault 2.0 Case Study
+
+VinoVault 2.0 was populated with complete case-study content covering:
+
+- The product problem
+- Full-stack solution
+- Major application features
+- Authentication and relational-data challenges
+- Technical lessons learned
+- Technology stack
+- GitHub repository
+
+A branded VinoVault image was uploaded as the project cover.
+
+Three application screenshots were added to the project gallery:
+
+1. Authenticated Browse Wines experience with filtering and external wine discovery
+2. My Cellar authenticated collection-management interface
+3. Wine Details experience with tasting-journal functionality
+
+The gallery was verified on both desktop and mobile layouts.
+
+### You Party – I Pour Case Study
+
+You Party – I Pour was populated with complete case-study content covering:
+
+- Client booking requirements
+- Full-stack application solution
+- Public and administrative features
+- Booking and scheduling workflows
+- Authentication and third-party integration challenges
+- Technical lessons learned
+- Technology stack
+
+Additional project imagery can be managed later through the Admin CMS.
+
+### Venom-Sprint Case Study
+
+The JavaScript Snake portfolio project was renamed publicly to:
+
+```text
+Venom-Sprint
+```
+
+Its existing project slug was preserved to avoid unnecessary URL and data changes.
+
+The case study documents functionality verified from the actual application implementation, including:
+
+- Canvas-based rendering
+- Grid-based snake movement
+- Keyboard controls
+- Reverse-direction prevention
+- Randomized food placement
+- Snake growth
+- Wall collision detection
+- Self-collision detection
+- Progressive speed increases
+- Score tracking
+- Persistent high scores with localStorage
+- Restart controls
+- Pause and resume
+- Manual game ending
+- Help modal
+
+The case study intentionally avoids claiming functionality not present in the implementation.
+
+The project's GitHub repository was connected to the case study, and the existing Venom-Sprint artwork was uploaded as its portfolio cover image.
+
+### Cloudinary Image Workflow Validation
+
+Phase 12 also exercised the image-management functionality built during Phase 7.
+
+Verified operations include:
+
+- Uploading a project cover
+- Uploading non-cover gallery images
+- Preserving a single project cover
+- Deleting an existing Cloudinary image
+- Removing its database metadata
+- Uploading a corrected replacement image
+- Retrieving ordered images through the public API
+- Preventing Cloudinary `public_id` values from appearing in public responses
+
+This provided an end-to-end validation of the image-management architecture before the Admin CMS is implemented.
+
+### Responsive Case Study Design
+
+The modal was tested on both desktop and mobile devices.
+
+Desktop verification confirmed:
+
+- Large contained modal presentation
+- Internal scrolling
+- Responsive cover images
+- Two-column screenshot gallery
+- Project metadata layout
+- Technology badges
+- External action buttons
+
+Mobile verification confirmed:
+
+- Responsive modal sizing
+- Single-column screenshot gallery
+- Readable case-study content
+- Responsive cover images
+- Accessible close controls
+- Working external project links
+
+No observed horizontal overflow or broken case-study layout was introduced.
+
+### Phase 12 Validation
+
+Client validation completed successfully:
+
+```bash
+npm run lint
+npm run build
+```
+
+The final Phase 12 production build completed successfully with Vite.
+
+The build transformed 51 modules and completed without errors.
+
+Manual regression testing was completed for:
+
+- VinoVault 2.0
+- You Party – I Pour
+- Venom-Sprint
+- Modal opening
+- Close button
+- Escape-key closing
+- Backdrop closing
+- Body scroll locking
+- Internal modal scrolling
+- Keyboard focus trapping
+- Focus restoration
+- Project cover images
+- Project galleries
+- Technology rendering
+- Conditional GitHub links
+- Conditional live-site links
+- Conditional gallery rendering
+- Desktop responsive behavior
+- Mobile responsive behavior
+
+### Phase 12 Status
+
+```text
+Project detail service             ✅
+Project detail API enhancement     ✅
+Case-study modal                   ✅
+Case-study API integration         ✅
+Modal internal scrolling           ✅
+Body scroll locking                ✅
+Escape-key closing                 ✅
+Backdrop closing                   ✅
+Close-button behavior              ✅
+Keyboard focus trap                ✅
+Focus restoration                  ✅
+Project metadata                   ✅
+Technology stack                   ✅
+Conditional GitHub links           ✅
+Conditional live-site links        ✅
+Project cover images               ✅
+Project gallery                    ✅
+Gallery captions                   ✅
+Gallery alt text                   ✅
+Cloudinary upload validation       ✅
+Cloudinary delete validation       ✅
+VinoVault case study               ✅
+You Party – I Pour case study      ✅
+Venom-Sprint case study            ✅
+Desktop responsive testing         ✅
+Mobile responsive testing          ✅
+ESLint                             ✅
+Production build                   ✅
+```
+
+Phase 12 completes the public portfolio's project case-study experience.
+
+Visitors can now move from a concise project card into a detailed, API-driven case study without leaving the single-page portfolio, while project content, technologies, links, covers, and gallery images remain controlled by the PostgreSQL-backed application data layer.
+
+Phase 13 will build the Resume and Contact experience.

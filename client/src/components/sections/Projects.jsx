@@ -1,10 +1,20 @@
-import { useEffect, useState } from "react";
-import { getProjects } from "../../services/projectService.js";
+import { useEffect, useRef, useState } from "react";
+
+import ProjectCaseStudyModal from "../projects/ProjectCaseStudyModal.jsx";
+import {
+  getProjectBySlug,
+  getProjects,
+} from "../../services/projectService.js";
 
 function Projects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [projectLoading, setProjectLoading] = useState(false);
+  const [projectError, setProjectError] = useState("");
+
+  const triggerButtonRef = useRef(null);
 
   useEffect(() => {
     async function loadProjects() {
@@ -20,6 +30,31 @@ function Projects() {
 
     loadProjects();
   }, []);
+
+  async function handleViewCaseStudy(slug, triggerButton) {
+    triggerButtonRef.current = triggerButton;
+
+    setProjectLoading(true);
+    setProjectError("");
+
+    try {
+      const project = await getProjectBySlug(slug);
+      setSelectedProject(project);
+    } catch (err) {
+      setProjectError(err.message);
+    } finally {
+      setProjectLoading(false);
+    }
+  }
+
+
+  function handleCloseCaseStudy() {
+    setSelectedProject(null);
+
+    requestAnimationFrame(() => {
+      triggerButtonRef.current?.focus();
+    });
+  }
 
   return (
     <section id="projects" className="portfolio-section projects-section">
@@ -103,7 +138,14 @@ function Projects() {
                     ))}
                   </div>
 
-                  <button className="project-link" type="button">
+                  <button
+                    className="project-link"
+                    type="button"
+                    onClick={(event) =>
+                      handleViewCaseStudy(project.slug, event.currentTarget)
+                    }
+                    disabled={projectLoading}
+                  >
                     View Case Study
                     <span aria-hidden="true">→</span>
                   </button>
@@ -113,6 +155,17 @@ function Projects() {
           </div>
         )}
       </div>
+
+      {projectError && (
+        <p className="section-status section-error">
+          {projectError}
+        </p>
+      )}
+
+      <ProjectCaseStudyModal
+        project={selectedProject}
+        onClose={handleCloseCaseStudy}
+      />
     </section>
   );
 }

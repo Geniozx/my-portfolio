@@ -103,9 +103,9 @@ async function getPublishedProjectBySlug(req, res, next) {
     const project = result.rows[0];
 
     if (!project) {
-        return res.status(404).json({
-            error: "Project not found.",
-        });
+      return res.status(404).json({
+        error: "Project not found.",
+      });
     }
 
     const imageResult = await pool.query(
@@ -127,7 +127,27 @@ async function getPublishedProjectBySlug(req, res, next) {
       [project.id]
     );
 
+    const technologyResult = await pool.query(
+      `
+        SELECT
+          t.id,
+          t.name,
+          t.category,
+          t.icon_url,
+          t.display_order
+        FROM project_technologies pt
+        JOIN technologies t
+          ON t.id = pt.technology_id
+        WHERE pt.project_id = $1
+        ORDER BY
+          t.display_order ASC,
+          t.name ASC
+      `,
+      [project.id]
+    );
+
     project.images = imageResult.rows;
+    project.technologies = technologyResult.rows;
 
     return res.status(200).json(project);
   } catch (error) {
