@@ -1632,6 +1632,36 @@ a {
   box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.1);
 }
 
+.form-message {
+  margin: 0;
+  padding: 0.85rem 1rem;
+
+  border: 1px solid;
+  border-radius: var(--radius-small);
+
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.form-message-success {
+  border-color: rgba(72, 187, 120, 0.35);
+
+  background-color: rgba(72, 187, 120, 0.08);
+  color: #8ed6aa;
+}
+
+.form-message-error {
+  border-color: rgba(239, 104, 104, 0.35);
+
+  background-color: rgba(239, 104, 104, 0.08);
+  color: #f0a0a0;
+}
+
+.contact-form .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .contact-form .button {
   justify-self: start;
   margin-top: 0.5rem;

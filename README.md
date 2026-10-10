@@ -437,7 +437,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 10 — Public Portfolio Shell
 - [x] Phase 11 — Skills & Projects Integration
 - [x] Phase 12 — Project Case Study Modal
-- [ ] Phase 13 — Resume & Contact
+- [x] Phase 13 — Resume & Contact
 - [ ] Phase 14 — Admin CMS Foundation
 - [ ] Phase 15 — Project Management CMS
 - [ ] Phase 16 — Technologies, Images & Messages CMS
@@ -814,44 +814,46 @@ The project now has:
 
 **Complete ✅**
 
-The Projects section now includes interactive, API-driven project case studies that allow visitors to explore individual projects without leaving the single-page portfolio.
+### Phase 13 — Resume & Contact
+
+**Complete ✅**
+
+The public portfolio now includes a developer-focused resume and a fully functional contact experience connected to the Express and PostgreSQL backend.
 
 The application now includes:
 
-- Reusable Project Case Study Modal
-- Project detail fetching through `GET /api/projects/:slug`
-- Database-driven case-study content
-- Project overview, problem, solution, features, challenges, and lessons learned
-- Project type and status metadata
-- Database-backed technology stacks
-- Conditional GitHub and live-site links
-- Cloudinary-backed project cover images
-- Responsive project screenshot galleries
-- Image captions and accessible alt text
-- Conditional rendering for optional project content
-- Internal modal scrolling
-- Background body scroll locking
-- Escape-key closing
-- Backdrop-click closing
-- Close-button support
-- Keyboard focus trapping
-- Focus restoration to the originating View Case Study button
-- VinoVault 2.0 complete case study
-- You Party – I Pour complete case study content
-- Venom-Sprint complete case study
-- VinoVault project cover and screenshot gallery
-- Venom-Sprint project cover
-- Cloudinary upload, deletion, and replacement workflow validation
+- Two-page developer-focused resume
+- Resume PDF served through the Vite public directory
+- View Resume action
+- Get In Touch action
+- Responsive resume access on desktop and mobile
+- Dedicated `contactService.js`
+- Controlled React Contact form
+- Contact submission through `POST /api/contact`
+- Name, email, subject, and message form state
+- Browser required-field validation
+- Browser email validation
+- Express server-side validation
+- Server validation feedback displayed in the React interface
+- Submission loading state
+- Disabled submit behavior while sending
+- Styled success feedback
+- Styled error feedback
+- Accessible success and error messaging
+- Form reset after successful submission
+- Form values preserved after failed API submissions
+- PostgreSQL contact-message persistence
+- New messages stored with unread status
+- End-to-end Contact workflow validation
 - Desktop and mobile responsive testing
 - Successful ESLint validation
 - Successful Vite production build validation
 
-The Projects section now provides a complete case-study experience while preserving the single-page portfolio navigation and responsive design.
+The Resume and Contact sections now provide visitors with direct access to a dedicated developer resume and a working way to submit messages through the portfolio.
 
-Additional project images can be managed later through the Admin CMS.
+Contact submissions are validated by the Express API and persisted in PostgreSQL for management through the protected Admin CMS.
 
-**Next:** Phase 13 — Resume & Contact
-
+**Next:** Phase 14 — Admin CMS Foundation
 
 
 Current backend capabilities include:
@@ -5330,4 +5332,230 @@ Phase 12 completes the public portfolio's project case-study experience.
 
 Visitors can now move from a concise project card into a detailed, API-driven case study without leaving the single-page portfolio, while project content, technologies, links, covers, and gallery images remain controlled by the PostgreSQL-backed application data layer.
 
-Phase 13 will build the Resume and Contact experience.
+Phase 13 builds the Resume and Contact experience.
+
+---
+
+## Phase 13 — Resume & Contact ✅
+
+Phase 13 completes the public portfolio's Resume and Contact sections by integrating a developer-focused resume and connecting the public contact form to the existing Express and PostgreSQL backend.
+
+### Developer Resume
+
+A new developer-focused resume was created specifically for the portfolio.
+
+The resume emphasizes:
+
+- Full-stack web development
+- JavaScript and Python
+- React
+- Node.js and Express
+- Django and Django REST Framework
+- PostgreSQL and relational database design
+- REST API development
+- JWT authentication
+- CRUD application development
+- Git and GitHub
+- Responsive application development
+
+The resume highlights three selected development projects:
+
+1. VinoVault 2.0
+2. You Party – I Pour
+3. Venom-Sprint
+
+The professional experience section preserves the transferable skills developed through 13+ years of pharmacy experience, including accuracy, organization, communication, responsibility, training, and working within complex real-world workflows.
+
+The completed resume is a two-page PDF and is stored in the Vite public directory:
+
+```text
+client/public/Eli-Rodriguez-Resume.pdf
+```
+
+The public Resume section now provides two actions:
+
+- View Resume
+- Get In Touch
+
+The View Resume action opens the PDF in a new browser tab.
+
+Resume behavior was verified on both desktop and mobile devices.
+
+### Contact Form Integration
+
+The existing public Contact form was converted from a presentation-only form into a working API-driven form.
+
+A dedicated client service was added:
+
+```text
+client/src/services/contactService.js
+```
+
+The service communicates with:
+
+```text
+POST /api/contact
+```
+
+The Contact component now manages controlled state for:
+
+- Name
+- Email
+- Subject
+- Message
+
+The form also manages:
+
+- Submission state
+- Success feedback
+- Error feedback
+- Form clearing after successful submission
+- Disabled submit behavior while sending
+
+### Contact Validation
+
+Client and server validation work together to protect the contact workflow.
+
+Browser-level validation handles:
+
+- Required name
+- Required email
+- Required message
+- Basic email formatting
+
+The Express API continues to enforce server-side validation for:
+
+- Required name, email, and message
+- Valid email formatting
+- Name length
+- Email length
+- Subject length
+
+API validation errors are returned to the React client and displayed directly in the Contact form.
+
+The Subject field remains optional.
+
+### Contact Database Validation
+
+A successful contact submission was tested through the actual public React form.
+
+The complete flow was verified:
+
+```text
+React Contact Form
+        ↓
+contactService.js
+        ↓
+POST /api/contact
+        ↓
+Express validation
+        ↓
+PostgreSQL
+        ↓
+Success response
+        ↓
+React success feedback
+```
+
+The submitted message was confirmed directly in the PostgreSQL `contact_messages` table.
+
+The stored record correctly included:
+
+- Name
+- Email
+- Subject
+- Message
+- Unread status
+- Creation timestamp
+
+New messages default to:
+
+```text
+is_read = false
+```
+
+This confirms the public Contact experience is connected end-to-end from the browser through the API and into persistent database storage.
+
+### Contact Feedback UX
+
+Success and error states were styled to match the existing dark portfolio design.
+
+The Contact form now provides:
+
+- A visible sending state
+- Disabled submit behavior during submission
+- Styled success feedback
+- Styled error feedback
+- Accessible `role="status"` success messaging
+- Accessible `role="alert"` error messaging
+- Form reset after successful submission
+- Preservation of entered values after failed API submissions
+
+The feedback interface was verified on both desktop and mobile devices.
+
+### Phase 13 Validation
+
+Client validation completed successfully:
+
+```bash
+npm run lint
+npm run build
+```
+
+The final Phase 13 production build completed successfully with Vite 8.3.2.
+
+The build transformed 52 modules and completed without errors.
+
+Manual testing was completed for:
+
+- Resume PDF loading
+- View Resume action
+- Get In Touch action
+- Desktop resume behavior
+- Mobile resume behavior
+- Controlled Contact form fields
+- Successful Contact submission
+- Sending state
+- Form reset after success
+- Success feedback
+- Server validation error feedback
+- Browser required-field validation
+- Browser email validation
+- PostgreSQL message persistence
+- Default unread message state
+- Desktop Contact layout
+- Mobile Contact layout
+
+### Phase 13 Status
+
+```text
+Developer resume                    ✅
+Two-page PDF                        ✅
+Resume public asset                 ✅
+View Resume action                  ✅
+Get In Touch action                 ✅
+Desktop resume testing              ✅
+Mobile resume testing               ✅
+Contact service                     ✅
+Controlled form state               ✅
+Contact API integration             ✅
+Submission loading state            ✅
+Disabled submission state           ✅
+Success feedback                    ✅
+Error feedback                      ✅
+Browser required validation         ✅
+Browser email validation            ✅
+Server validation feedback          ✅
+Successful database insertion       ✅
+Unread message default              ✅
+Desktop Contact testing             ✅
+Mobile Contact testing              ✅
+ESLint                              ✅
+Production build                    ✅
+```
+
+Phase 13 completes the public portfolio's Resume and Contact experience.
+
+Visitors can now review a dedicated developer resume and contact the developer directly through an API-driven form, while submitted messages are validated by the Express backend and persisted in PostgreSQL for management through the protected Admin CMS.
+
+Phase 14 will build the Admin CMS Foundation.

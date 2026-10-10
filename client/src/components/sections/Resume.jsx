@@ -16,9 +16,20 @@ function Resume() {
             constraints. I now bring those skills into software development.
           </p>
 
-          <a className="button button-secondary" href="#contact">
-            Get In Touch
-          </a>
+          <div className="resume-actions">
+            <a
+              className="button button-primary"
+              href="/Eli-Rodriguez-Resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View Resume
+            </a>
+
+            <a className="button button-secondary" href="#contact">
+              Get In Touch
+            </a>
+          </div>
         </div>
 
         <div className="resume-summary">

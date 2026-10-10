@@ -1,4 +1,54 @@
+import { useState } from "react";
+
+import { sendContactMessage } from "../../services/contactService";
+
 function Contact() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState("");
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+
+    setFormData((currentFormData) => ({
+      ...currentFormData,
+      [name]: value,
+    }));
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    setSubmitting(true);
+    setSubmitError("");
+    setSubmitSuccess("");
+
+    try {
+      await sendContactMessage(formData);
+
+      setSubmitSuccess("Your message has been sent successfully.");
+
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+    } catch (error) {
+      setSubmitError(error.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+
   return (
     <section id="contact" className="portfolio-section contact-section">
       <div className="section-container">
@@ -27,7 +77,7 @@ function Contact() {
             </div>
           </div>
 
-          <form className="contact-form">
+          <form className="contact-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="contact-name">Name</label>
               <input
@@ -35,6 +85,9 @@ function Contact() {
                 name="name"
                 type="text"
                 placeholder="Your name"
+                value={formData.name}
+                onChange={handleChange}
+                required
               />
             </div>
 
@@ -45,6 +98,9 @@ function Contact() {
                 name="email"
                 type="email"
                 placeholder="you@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                required
               />
             </div>
 
@@ -55,6 +111,8 @@ function Contact() {
                 name="subject"
                 type="text"
                 placeholder="What would you like to discuss?"
+                value={formData.subject}
+                onChange={handleChange}
               />
             </div>
 
@@ -65,11 +123,30 @@ function Contact() {
                 name="message"
                 rows="6"
                 placeholder="Tell me a little about your project or opportunity..."
+                value={formData.message}
+                onChange={handleChange}
+                required
               />
             </div>
 
-            <button className="button button-primary" type="button">
-              Send Message
+            {submitError && (
+              <p className="form-message form-message-error" role="alert">
+                {submitError}
+              </p>
+            )}
+
+            {submitSuccess && (
+              <p className="form-message form-message-success" role="status">
+                {submitSuccess}
+              </p>
+            )}
+
+            <button
+              className="button button-primary"
+              type="submit"
+              disabled={submitting}
+            >
+              {submitting ? "Sending..." : "Send Message"}
             </button>
           </form>
         </div>
