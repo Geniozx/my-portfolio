@@ -439,7 +439,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 12 — Project Case Study Modal
 - [x] Phase 13 — Resume & Contact
 - [x] Phase 14 — Admin CMS Foundation
-- [ ] Phase 15 — Project Management CMS
+- [x] Phase 15 — Project Management CMS
 - [ ] Phase 16 — Technologies, Images & Messages CMS
 - [ ] Phase 17 — Snake Game Integration
 - [ ] Phase 18 — Testing, Polish & Deployment
@@ -822,37 +822,56 @@ The project now has:
 
 **Complete ✅**
 
-The portfolio now includes a protected and responsive Admin CMS foundation built on the authentication infrastructure established earlier in the project.
+### Phase 15 — Project Management CMS
+
+**Complete ✅**
+
+The Admin CMS now includes complete project-management functionality backed by the protected Express API and PostgreSQL database.
 
 The application now includes:
 
-- Protected `/admin` route hierarchy
-- Administrator login interface
-- JWT-backed administrator authentication
-- Administrator session restoration
-- Protected-route redirects
-- Responsive Admin CMS layout
-- Desktop sidebar navigation
-- Responsive mobile CMS navigation
-- Active admin navigation states
-- Administrator identity display
-- Dashboard landing page
-- Projects management navigation
-- Technologies management navigation
-- Messages management navigation
-- View Portfolio action
-- Administrator logout
-- Styled authentication error feedback
-- Login submission state
-- Browser credential autocomplete support
-- Desktop Admin CMS testing
-- Mobile Admin CMS testing
+- Protected administrator project listing
+- Create project workflow
+- Edit project workflow
+- Delete project workflow with confirmation
+- Project detail loading by ID
+- Project title and slug management
+- Short description management
+- Complete case-study content management
+- Project type management
+- Controlled project status selection
+- GitHub URL management
+- Live URL management
+- Display order management
+- Publish / unpublish controls
+- Feature / unfeature controls
+- Technology assignment and reassignment
+- Existing technology selections restored during editing
+- Project changes persisted to PostgreSQL
+- Responsive project-management interface
+- Responsive create/edit project form
+- Desktop CMS testing
+- Mobile CMS testing
+- Full CRUD workflow testing with a temporary project
 - Successful ESLint validation
 - Successful Vite production build validation
 
-The Admin CMS now provides the protected application shell that the remaining portfolio-management features will use.
+Project status is managed through the following controlled options:
 
-**Next:** Phase 15 — Project Management CMS
+- In Development
+- Completed
+- Maintained
+- Archived
+
+Project status, public visibility, and portfolio emphasis remain separate concerns:
+
+- `status` describes the development state of the project
+- `published` determines whether the project is publicly visible
+- `featured` determines whether the project receives featured emphasis
+
+The protected project-detail endpoint now also returns the technologies assigned to a project, allowing the Admin CMS to restore existing technology selections when editing.
+
+**Next:** Phase 16 — Technologies, Images & Messages CMS
 
 
 Current backend capabilities include:
@@ -5801,3 +5820,142 @@ Phase 14 completes the protected Admin CMS foundation.
 The portfolio now has a responsive administrative application shell with authentication, protected routing, session restoration, navigation, logout functionality, and a central dashboard ready for the portfolio-management workflows that follow.
 
 Phase 15 will build the Project Management CMS.
+
+
+---
+
+## Phase 15 — Project Management CMS
+
+Phase 15 transformed the Admin Projects area from placeholder pages into a complete project-management interface.
+
+### Admin Project List
+
+The protected `/admin/projects` page now loads all portfolio projects from the administrator API.
+
+Each project card displays:
+
+- Project title
+- Project type
+- Short description
+- Published / unpublished state
+- Featured state
+- Project status
+- Display order
+- Project slug
+- Edit action
+- Delete action
+
+Administrators can also navigate directly to the Add Project workflow.
+
+### Create Project
+
+The `/admin/projects/new` route now provides a complete project creation form.
+
+Administrators can manage:
+
+- Title
+- Slug
+- Short description
+- Overview
+- Problem
+- Solution
+- Features
+- Challenges
+- Lessons learned
+- Project type
+- Project status
+- GitHub URL
+- Live URL
+- Display order
+- Published state
+- Featured state
+- Technology assignments
+
+Required project fields are enforced by both the client form and backend API.
+
+### Edit Project
+
+The `/admin/projects/:id/edit` route loads the existing project from the protected project-detail endpoint.
+
+Existing project data is restored into the form, including:
+
+- Case-study content
+- Metadata
+- Publishing state
+- Featured state
+- Display order
+- Technology assignments
+
+Saving changes updates the project through the protected administrator API and replaces its technology assignments with the currently selected technologies.
+
+### Project Status
+
+Project status uses controlled CMS options instead of unrestricted text entry:
+
+- In Development
+- Completed
+- Maintained
+- Archived
+
+Status remains independent from the `published` and `featured` controls.
+
+### Technology Assignment
+
+Projects can be associated with technologies directly from the project form.
+
+The project-detail API was expanded to return the technologies currently assigned to a project. This allows the edit form to automatically restore the correct technology selections.
+
+Technology relationships are updated through:
+
+`PUT /api/admin/projects/:id/technologies`
+
+### Project Deletion
+
+Administrators can delete projects from the project-management page.
+
+Deletion requires browser confirmation before the request is sent.
+
+The backend deletion workflow also removes associated Cloudinary project images when applicable before removing the project record.
+
+### Responsive CMS
+
+The project-management interface was tested on both desktop and mobile layouts.
+
+The responsive interface includes:
+
+- Stacked project cards on smaller screens
+- Responsive project actions
+- Responsive project form grids
+- Responsive technology selection controls
+- Mobile-friendly form actions
+
+### CRUD Validation
+
+A temporary Phase 15 project was used to verify the complete project lifecycle without modifying or deleting an existing portfolio project.
+
+The following workflow passed:
+
+`Create → Read → Edit → Reassign Technologies → Persist → Delete`
+
+The temporary project was deleted after testing.
+
+### Validation
+
+Phase 15 passed:
+
+- Project list testing
+- Create project testing
+- Edit project testing
+- Project persistence testing
+- Technology assignment testing
+- Technology reassignment testing
+- Delete confirmation testing
+- Project deletion testing
+- Desktop responsive testing
+- Mobile responsive testing
+- ESLint validation
+- Vite production build validation
+
+Phase 15 is complete.
+
+Phase 16 will build the Technologies, Images & Messages CMS.

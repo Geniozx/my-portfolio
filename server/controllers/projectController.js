@@ -250,7 +250,27 @@ async function getProjectById(req, res, next) {
       [project.id]
     );
 
-project.images = imageResult.rows;
+    const technologyResult = await pool.query(
+      `
+        SELECT
+          t.id,
+          t.name,
+          t.category,
+          t.icon_url,
+          t.display_order
+        FROM project_technologies pt
+        JOIN technologies t
+          ON t.id = pt.technology_id
+        WHERE pt.project_id = $1
+        ORDER BY
+          t.display_order ASC,
+          t.name ASC
+      `,
+      [project.id]
+    );
+
+    project.images = imageResult.rows;
+    project.technologies = technologyResult.rows;
 
     return res.status(200).json(project);
   } catch (error) {
