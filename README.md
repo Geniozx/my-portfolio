@@ -438,7 +438,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 11 — Skills & Projects Integration
 - [x] Phase 12 — Project Case Study Modal
 - [x] Phase 13 — Resume & Contact
-- [ ] Phase 14 — Admin CMS Foundation
+- [x] Phase 14 — Admin CMS Foundation
 - [ ] Phase 15 — Project Management CMS
 - [ ] Phase 16 — Technologies, Images & Messages CMS
 - [ ] Phase 17 — Snake Game Integration
@@ -818,42 +818,41 @@ The project now has:
 
 **Complete ✅**
 
-The public portfolio now includes a developer-focused resume and a fully functional contact experience connected to the Express and PostgreSQL backend.
+### Phase 14 — Admin CMS Foundation
+
+**Complete ✅**
+
+The portfolio now includes a protected and responsive Admin CMS foundation built on the authentication infrastructure established earlier in the project.
 
 The application now includes:
 
-- Two-page developer-focused resume
-- Resume PDF served through the Vite public directory
-- View Resume action
-- Get In Touch action
-- Responsive resume access on desktop and mobile
-- Dedicated `contactService.js`
-- Controlled React Contact form
-- Contact submission through `POST /api/contact`
-- Name, email, subject, and message form state
-- Browser required-field validation
-- Browser email validation
-- Express server-side validation
-- Server validation feedback displayed in the React interface
-- Submission loading state
-- Disabled submit behavior while sending
-- Styled success feedback
-- Styled error feedback
-- Accessible success and error messaging
-- Form reset after successful submission
-- Form values preserved after failed API submissions
-- PostgreSQL contact-message persistence
-- New messages stored with unread status
-- End-to-end Contact workflow validation
-- Desktop and mobile responsive testing
+- Protected `/admin` route hierarchy
+- Administrator login interface
+- JWT-backed administrator authentication
+- Administrator session restoration
+- Protected-route redirects
+- Responsive Admin CMS layout
+- Desktop sidebar navigation
+- Responsive mobile CMS navigation
+- Active admin navigation states
+- Administrator identity display
+- Dashboard landing page
+- Projects management navigation
+- Technologies management navigation
+- Messages management navigation
+- View Portfolio action
+- Administrator logout
+- Styled authentication error feedback
+- Login submission state
+- Browser credential autocomplete support
+- Desktop Admin CMS testing
+- Mobile Admin CMS testing
 - Successful ESLint validation
 - Successful Vite production build validation
 
-The Resume and Contact sections now provide visitors with direct access to a dedicated developer resume and a working way to submit messages through the portfolio.
+The Admin CMS now provides the protected application shell that the remaining portfolio-management features will use.
 
-Contact submissions are validated by the Express API and persisted in PostgreSQL for management through the protected Admin CMS.
-
-**Next:** Phase 14 — Admin CMS Foundation
+**Next:** Phase 15 — Project Management CMS
 
 
 Current backend capabilities include:
@@ -5558,4 +5557,247 @@ Phase 13 completes the public portfolio's Resume and Contact experience.
 
 Visitors can now review a dedicated developer resume and contact the developer directly through an API-driven form, while submitted messages are validated by the Express backend and persisted in PostgreSQL for management through the protected Admin CMS.
 
-Phase 14 will build the Admin CMS Foundation.
+Phase 14 builds the Admin CMS Foundation.
+
+---
+
+## Phase 14 — Admin CMS Foundation ✅
+
+Phase 14 establishes the protected React administration experience that will support portfolio content management throughout the remaining CMS phases.
+
+The authentication backend and initial React routing infrastructure were created during earlier phases. Phase 14 builds on that foundation by completing the Admin CMS shell, dashboard, responsive navigation, login presentation, and authentication lifecycle validation.
+
+### Admin Authentication Foundation
+
+The Admin CMS uses the existing authentication endpoints:
+
+```text
+POST /api/auth/login
+GET /api/auth/me
+```
+
+Successful authentication stores the administrator JWT in the browser and updates the shared React authentication context.
+
+The authentication provider restores existing administrator sessions by retrieving the stored token and validating it through:
+
+```text
+GET /api/auth/me
+```
+
+Invalid or expired authentication removes the stored token and returns the application to an unauthenticated state.
+
+### Protected Admin Routing
+
+The Admin CMS is protected through the existing `ProtectedRoute` component.
+
+Protected routes include:
+
+```text
+/admin
+/admin/projects
+/admin/projects/new
+/admin/projects/:id/edit
+/admin/technologies
+/admin/messages
+/admin/messages/:id
+```
+
+Unauthenticated attempts to access `/admin` or nested admin routes automatically redirect to:
+
+```text
+/admin/login
+```
+
+Protected routing was verified after logout on both desktop and mobile devices.
+
+### Admin CMS Layout
+
+The Admin CMS now uses a dedicated responsive application layout.
+
+The desktop layout includes:
+
+- Portfolio CMS branding
+- Persistent sidebar navigation
+- Dashboard navigation
+- Projects navigation
+- Technologies navigation
+- Messages navigation
+- Active navigation highlighting
+- Signed-in administrator identity
+- Log Out action
+- View Portfolio action
+- Dedicated admin content area
+
+The CMS uses the same charcoal, navy, warm-white, and amber design system as the public portfolio while maintaining a distinct application-style interface.
+
+### Admin Dashboard
+
+The Admin Dashboard now provides a central landing page for portfolio management.
+
+The dashboard includes navigation cards for:
+
+- Projects
+- Technologies
+- Messages
+
+Each card introduces the management area and links directly to its corresponding protected route.
+
+The dashboard intentionally does not duplicate the management functionality scheduled for later phases.
+
+Phase 15 will implement Project Management, while Phase 16 will implement Technologies, Images, and Messages management.
+
+### Responsive Admin Experience
+
+The Admin CMS was designed and tested for both desktop and mobile layouts.
+
+On larger screens, the interface uses a persistent sidebar and dedicated main content area.
+
+On smaller screens, the sidebar converts into a responsive top navigation area so the CMS remains usable without compressing the desktop layout.
+
+Responsive testing confirmed:
+
+- Desktop CMS layout
+- Mobile CMS layout
+- Responsive navigation
+- Active navigation states
+- Dashboard cards
+- Administrator identity
+- Logout controls
+- View Portfolio access
+
+### Admin Login Experience
+
+The administrator login page was given a dedicated CMS design consistent with the rest of the portfolio.
+
+The login interface includes:
+
+- Portfolio CMS branding
+- Username field
+- Password field
+- Required-field validation
+- Username autocomplete support
+- Current-password autocomplete support
+- Submission loading state
+- Disabled submission behavior while signing in
+- Accessible authentication error feedback
+- Return to Portfolio action
+
+The login page was verified visually on both desktop and mobile devices.
+
+### Authentication Lifecycle Validation
+
+The complete administrator authentication lifecycle was manually tested.
+
+The verified flow is:
+
+```text
+Admin Login
+     ↓
+POST /api/auth/login
+     ↓
+JWT stored in localStorage
+     ↓
+Authentication context updated
+     ↓
+Redirect to /admin
+     ↓
+Protected Admin CMS
+     ↓
+Browser refresh
+     ↓
+GET /api/auth/me
+     ↓
+Administrator session restored
+```
+
+Session restoration was verified after refreshing both:
+
+```text
+/admin
+/admin/projects
+```
+
+The administrator remained authenticated and on the expected protected route.
+
+Logout was also verified.
+
+The logout flow removes the stored administrator token, clears the authentication context, and redirects to:
+
+```text
+/admin/login
+```
+
+Attempts to revisit protected routes after logout correctly redirect back to the login page.
+
+### Phase 14 Validation
+
+Client validation completed successfully:
+
+```bash
+npm run lint
+npm run build
+```
+
+The final Phase 14 production build completed successfully with Vite 8.3.2.
+
+The build transformed 52 modules and completed without errors.
+
+Manual regression testing was completed for:
+
+- Administrator login
+- Login submission state
+- Authentication error presentation
+- Redirect to Admin Dashboard
+- Administrator identity rendering
+- Admin Dashboard
+- Projects navigation
+- Technologies navigation
+- Messages navigation
+- Active navigation states
+- View Portfolio action
+- Administrator logout
+- Protected `/admin` route
+- Protected nested admin routes
+- Unauthenticated redirects
+- Session restoration
+- Refresh from `/admin`
+- Refresh from `/admin/projects`
+- Desktop Admin CMS layout
+- Mobile Admin CMS layout
+- Desktop Admin Login
+- Mobile Admin Login
+
+### Phase 14 Status
+
+```text
+Admin authentication integration      ✅
+Admin login interface                 ✅
+JWT authentication                    ✅
+Authentication context                ✅
+Session restoration                   ✅
+Protected admin routes                ✅
+Unauthenticated redirects             ✅
+Admin CMS layout                      ✅
+Desktop sidebar navigation            ✅
+Mobile CMS navigation                 ✅
+Active navigation states              ✅
+Administrator identity                ✅
+Admin Dashboard                       ✅
+Projects navigation                   ✅
+Technologies navigation               ✅
+Messages navigation                   ✅
+View Portfolio action                 ✅
+Administrator logout                  ✅
+Login loading state                   ✅
+Authentication error feedback         ✅
+Desktop responsive testing            ✅
+Mobile responsive testing             ✅
+ESLint                                ✅
+Production build                      ✅
+```
+
+Phase 14 completes the protected Admin CMS foundation.
+
+The portfolio now has a responsive administrative application shell with authentication, protected routing, session restoration, navigation, logout functionality, and a central dashboard ready for the portfolio-management workflows that follow.
+
+Phase 15 will build the Project Management CMS.

@@ -34,38 +34,60 @@ function AdminLogin() {
   }
 
   return (
-    <main>
-      <h1>Admin Login</h1>
-
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username</label>
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            required
-          />
+    <main className="admin-login">
+      <section className="admin-login-card">
+        <div className="admin-login-header">
+          <p className="admin-eyebrow">Portfolio CMS</p>
+          <h1>Admin Login</h1>
+          <p>
+            Sign in to manage portfolio projects, technologies, and messages.
+          </p>
         </div>
 
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
-        </div>
+        <form className="admin-login-form" onSubmit={handleSubmit}>
+          <div className="admin-login-field">
+            <label htmlFor="username">Username</label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              autoComplete="username"
+              required
+            />
+          </div>
 
-        {error && <p>{error}</p>}
+          <div className="admin-login-field">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </div>
 
-        <button type="submit" disabled={submitting}>
-          {submitting ? "Signing in..." : "Sign In"}
-        </button>
-      </form>
+          {error && (
+            <p className="admin-login-error" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button
+            className="button button-primary"
+            type="submit"
+            disabled={submitting}
+          >
+            {submitting ? "Signing in..." : "Sign In"}
+          </button>
+        </form>
+
+        <a className="admin-login-return" href="/">
+          ← Return to Portfolio
+        </a>
+      </section>
     </main>
   );
 }
