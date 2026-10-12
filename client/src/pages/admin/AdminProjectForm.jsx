@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+
 import {
   createProject,
   getAdminProjectById,
   updateProject,
   updateProjectTechnologies,
 } from "../../services/projectService.js";
+
 import { getTechnologies } from "../../services/technologyService.js";
+
+import {
+  deleteProjectImage,
+  updateProjectImage,
+  uploadProjectImage,
+} from "../../services/projectImageService.js";
 
 const initialFormData = {
   title: "",
@@ -36,6 +44,17 @@ function AdminProjectForm() {
   const [formData, setFormData] = useState(initialFormData);
   const [technologies, setTechnologies] = useState([]);
   const [selectedTechnologyIds, setSelectedTechnologyIds] = useState([]);
+  const [projectImages, setProjectImages] = useState([]);
+
+  const [imageFile, setImageFile] = useState(null);
+  const [imageAltText, setImageAltText] = useState("");
+  const [imageCaption, setImageCaption] = useState("");
+  const [imageIsCover, setImageIsCover] = useState(false);
+  const [imageDisplayOrder, setImageDisplayOrder] = useState(0);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState("");
+  const [savingImageId, setSavingImageId] = useState(null);
+  const [deletingImageId, setDeletingImageId] = useState(null);
 
   const [loading, setLoading] = useState(isEditing);
   const [submitting, setSubmitting] = useState(false);
@@ -76,6 +95,8 @@ function AdminProjectForm() {
               (technology) => technology.id,
             ),
           );
+
+          setProjectImages(project.images || []);
         }
       } catch (err) {
         setError(err.message);
@@ -106,6 +127,147 @@ function AdminProjectForm() {
 
       return [...currentIds, technologyId];
     });
+  }
+
+  async function handleImageUpload(event) {
+    event.preventDefault();
+
+    if (!imageFile) {
+      setImageError("Please select an image.");
+      return;
+    }
+
+    const token = localStorage.getItem("adminToken");
+
+    const imageData = new FormData();
+
+    imageData.append("image", imageFile);
+    imageData.append("alt_text", imageAltText);
+    imageData.append("caption", imageCaption);
+    imageData.append("is_cover", String(imageIsCover));
+    imageData.append(
+      "display_order",
+      String(Number(imageDisplayOrder)),
+    );
+
+    setUploadingImage(true);
+    setImageError("");
+
+    try {
+      const newImage = await uploadProjectImage(
+        id,
+        imageData,
+        token,
+      );
+
+      setProjectImages((currentImages) => {
+        let updatedImages = currentImages;
+
+        if (newImage.is_cover) {
+          updatedImages = currentImages.map((image) => ({
+            ...image,
+            is_cover: false,
+          }));
+        }
+
+        return [...updatedImages, newImage].sort(
+          (a, b) =>
+            Number(b.is_cover) - Number(a.is_cover) ||
+            a.display_order - b.display_order ||
+            a.id - b.id,
+        );
+      });
+
+      setImageFile(null);
+      setImageAltText("");
+      setImageCaption("");
+      setImageIsCover(false);
+      setImageDisplayOrder(0);
+
+      event.target.reset();
+    } catch (err) {
+      setImageError(err.message);
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
+  async function handleImageUpdate(imageId, imageData) {
+    const token = localStorage.getItem("adminToken");
+
+    setSavingImageId(imageId);
+    setImageError("");
+
+    try {
+      const updatedImage = await updateProjectImage(
+        id,
+        imageId,
+        imageData,
+        token,
+      );
+
+      setProjectImages((currentImages) =>
+        currentImages
+          .map((image) => {
+            if (updatedImage.is_cover) {
+              return {
+                ...image,
+                is_cover: image.id === updatedImage.id,
+                ...(image.id === updatedImage.id
+                  ? updatedImage
+                  : {}),
+              };
+            }
+
+            return image.id === updatedImage.id
+              ? updatedImage
+              : image;
+          })
+          .sort(
+            (a, b) =>
+              Number(b.is_cover) - Number(a.is_cover) ||
+              a.display_order - b.display_order ||
+              a.id - b.id,
+          ),
+      );
+    } catch (err) {
+      setImageError(err.message);
+    } finally {
+      setSavingImageId(null);
+    }
+  }
+
+  async function handleImageDelete(image) {
+    const confirmed = window.confirm(
+      `Delete this project image? This cannot be undone.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const token = localStorage.getItem("adminToken");
+
+    setDeletingImageId(image.id);
+    setImageError("");
+
+    try {
+      await deleteProjectImage(
+        id,
+        image.id,
+        token,
+      );
+
+      setProjectImages((currentImages) =>
+        currentImages.filter(
+          (currentImage) => currentImage.id !== image.id,
+        ),
+      );
+    } catch (err) {
+      setImageError(err.message);
+    } finally {
+      setDeletingImageId(null);
+    }
   }
 
   async function handleSubmit(event) {
@@ -411,6 +573,247 @@ function AdminProjectForm() {
           </button>
         </div>
       </form>
+
+      {isEditing && (
+          <section className="admin-form-section">
+            <div className="admin-form-section-heading">
+              <p className="admin-card-label">Project Media</p>
+              <h3>Project Images</h3>
+              <p>
+                Manage the cover image and case study gallery for this project.
+              </p>
+            </div>
+
+            <form
+              className="admin-project-image-upload"
+              onSubmit={handleImageUpload}
+            >
+              <div className="admin-form-grid">
+                <div className="admin-form-field admin-form-field-full">
+                  <label htmlFor="project-image-file">
+                    Image File
+                  </label>
+
+                  <input
+                    id="project-image-file"
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) =>
+                      setImageFile(event.target.files?.[0] || null)
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="admin-form-field">
+                  <label htmlFor="project-image-alt">
+                    Alt Text
+                  </label>
+
+                  <input
+                    id="project-image-alt"
+                    type="text"
+                    value={imageAltText}
+                    onChange={(event) =>
+                      setImageAltText(event.target.value)
+                    }
+                    placeholder="Describe the image"
+                  />
+                </div>
+
+                <div className="admin-form-field">
+                  <label htmlFor="project-image-order">
+                    Display Order
+                  </label>
+
+                  <input
+                    id="project-image-order"
+                    type="number"
+                    min="0"
+                    value={imageDisplayOrder}
+                    onChange={(event) =>
+                      setImageDisplayOrder(event.target.value)
+                    }
+                  />
+                </div>
+
+                <div className="admin-form-field admin-form-field-full">
+                  <label htmlFor="project-image-caption">
+                    Caption
+                  </label>
+
+                  <input
+                    id="project-image-caption"
+                    type="text"
+                    value={imageCaption}
+                    onChange={(event) =>
+                      setImageCaption(event.target.value)
+                    }
+                    placeholder="Optional caption"
+                  />
+                </div>
+              </div>
+
+              <label className="admin-form-toggle">
+                <input
+                  type="checkbox"
+                  checked={imageIsCover}
+                  onChange={(event) =>
+                    setImageIsCover(event.target.checked)
+                  }
+                />
+
+                <span>Set as cover image</span>
+              </label>
+
+              {imageError && (
+                <p className="admin-projects-error" role="alert">
+                  {imageError}
+                </p>
+              )}
+
+              <div className="admin-project-image-upload-actions">
+                <button
+                  className="button button-primary"
+                  type="submit"
+                  disabled={uploadingImage}
+                >
+                  {uploadingImage ? "Uploading..." : "Upload Image"}
+                </button>
+              </div>
+            </form>
+
+            {projectImages.length === 0 ? (
+              <div className="admin-empty-state">
+                <p>No images have been added to this project yet.</p>
+              </div>
+            ) : (
+              <div className="admin-project-image-grid">
+                {projectImages.map((image) => (
+                  <article
+                    className="admin-project-image-card"
+                    key={image.id}
+                  >
+                    <div className="admin-project-image-preview">
+                      <img
+                        src={image.image_url}
+                        alt={image.alt_text || "Project image"}
+                      />
+
+                      {image.is_cover && (
+                        <span className="admin-project-image-cover-badge">
+                          Cover
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="admin-project-image-details">
+                      <div className="admin-form-field">
+                        <label htmlFor={`image-alt-${image.id}`}>
+                          Alt Text
+                        </label>
+
+                        <input
+                          id={`image-alt-${image.id}`}
+                          type="text"
+                          defaultValue={image.alt_text || ""}
+                        />
+                      </div>
+
+                      <div className="admin-form-field">
+                        <label htmlFor={`image-caption-${image.id}`}>
+                          Caption
+                        </label>
+
+                        <input
+                          id={`image-caption-${image.id}`}
+                          type="text"
+                          defaultValue={image.caption || ""}
+                        />
+                      </div>
+
+                      <div className="admin-form-field">
+                        <label htmlFor={`image-order-${image.id}`}>
+                          Display Order
+                        </label>
+
+                        <input
+                          id={`image-order-${image.id}`}
+                          type="number"
+                          min="0"
+                          defaultValue={image.display_order}
+                        />
+                      </div>
+
+                      <label className="admin-form-toggle">
+                        <input
+                          id={`image-cover-${image.id}`}
+                          type="checkbox"
+                          defaultChecked={image.is_cover}
+                        />
+
+                        <span>Cover image</span>
+                      </label>
+
+                      <div className="admin-project-image-card-actions">
+                        <button
+                          className="button button-secondary"
+                          type="button"
+                          disabled={
+                            savingImageId === image.id ||
+                            deletingImageId === image.id
+                          }
+                          onClick={() => {
+                            const altText = document.getElementById(
+                              `image-alt-${image.id}`,
+                            ).value;
+
+                            const caption = document.getElementById(
+                              `image-caption-${image.id}`,
+                            ).value;
+
+                            const displayOrder = document.getElementById(
+                              `image-order-${image.id}`,
+                            ).value;
+
+                            const isCover = document.getElementById(
+                              `image-cover-${image.id}`,
+                            ).checked;
+
+                            handleImageUpdate(image.id, {
+                              alt_text: altText,
+                              caption,
+                              display_order: Number(displayOrder),
+                              is_cover: isCover,
+                            });
+                          }}
+                        >
+                          {savingImageId === image.id
+                            ? "Saving..."
+                            : "Save Image"}
+                        </button>
+
+                        <button
+                          className="button button-danger"
+                          type="button"
+                          disabled={
+                            deletingImageId === image.id ||
+                            savingImageId === image.id
+                          }
+                          onClick={() => handleImageDelete(image)}
+                        >
+                          {deletingImageId === image.id
+                            ? "Deleting..."
+                            : "Delete Image"}
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
     </main>
   );
 }

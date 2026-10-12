@@ -440,7 +440,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 13 — Resume & Contact
 - [x] Phase 14 — Admin CMS Foundation
 - [x] Phase 15 — Project Management CMS
-- [ ] Phase 16 — Technologies, Images & Messages CMS
+- [x] Phase 16 — Technologies, Images & Messages CMS
 - [ ] Phase 17 — Snake Game Integration
 - [ ] Phase 18 — Testing, Polish & Deployment
 
@@ -826,52 +826,65 @@ The project now has:
 
 **Complete ✅**
 
-The Admin CMS now includes complete project-management functionality backed by the protected Express API and PostgreSQL database.
+### Phase 16 — Technologies, Images & Messages CMS
+
+**Complete ✅**
+
+The Admin CMS now includes complete management workflows for technologies, project images, and portfolio contact messages.
 
 The application now includes:
 
-- Protected administrator project listing
-- Create project workflow
-- Edit project workflow
-- Delete project workflow with confirmation
-- Project detail loading by ID
-- Project title and slug management
-- Short description management
-- Complete case-study content management
-- Project type management
-- Controlled project status selection
-- GitHub URL management
-- Live URL management
-- Display order management
-- Publish / unpublish controls
-- Feature / unfeature controls
-- Technology assignment and reassignment
-- Existing technology selections restored during editing
-- Project changes persisted to PostgreSQL
-- Responsive project-management interface
-- Responsive create/edit project form
+- Protected administrator technology management
+- Create technology workflow
+- Edit technology workflow
+- Delete technology workflow
+- Controlled technology category selection
+- Technology icon URL management
+- Technology display order management
+- Responsive technology-management interface
+- Cloudinary project image uploads
+- Project image alt text management
+- Project image caption management
+- Project image display order management
+- Project cover image selection
+- Single-cover enforcement
+- Project image metadata editing
+- Project image deletion with confirmation
+- Public portfolio cover image integration
+- Protected administrator message inbox
+- Contact message detail view
+- Read / unread message management
+- Message status persistence
+- Contact message deletion with confirmation
+- Responsive Messages CMS
 - Desktop CMS testing
 - Mobile CMS testing
-- Full CRUD workflow testing with a temporary project
+- Complete CRUD validation
 - Successful ESLint validation
 - Successful Vite production build validation
+- Successful Git whitespace validation
 
-Project status is managed through the following controlled options:
+Technology categories are managed through the following controlled options:
 
-- In Development
-- Completed
-- Maintained
-- Archived
+- Languages
+- Frontend
+- Backend
+- Database
+- Tools
 
-Project status, public visibility, and portfolio emphasis remain separate concerns:
+Project images are uploaded to Cloudinary while image metadata is stored in PostgreSQL.
 
-- `status` describes the development state of the project
-- `published` determines whether the project is publicly visible
-- `featured` determines whether the project receives featured emphasis
+Each project supports a single active cover image. Selecting a new cover automatically removes the cover status from the previous image, and the active cover image is used by the public portfolio.
 
-The protected project-detail endpoint now also returns the technologies assigned to a project, allowing the Admin CMS to restore existing technology selections when editing.
+Contact messages submitted through the public portfolio are now manageable through the protected Admin CMS. Administrators can review complete messages, mark them as read or unread, and permanently delete them.
 
-**Next:** Phase 16 — Technologies, Images & Messages CMS
+Phase 16 completed all three planned CMS areas:
+
+- **16A — Technologies CMS**
+- **16B — Project Images CMS**
+- **16C — Messages CMS**
+
+**Next:** Phase 17 — Snake Game Integration
 
 
 Current backend capabilities include:
@@ -5959,3 +5972,210 @@ Phase 15 passed:
 Phase 15 is complete.
 
 Phase 16 will build the Technologies, Images & Messages CMS.
+
+
+---
+
+## Phase 16 — Technologies, Images & Messages CMS
+
+Phase 16 expanded the Admin CMS with management workflows for portfolio technologies, project images, and contact messages.
+
+### Technologies CMS
+
+The protected `/admin/technologies` page now provides complete technology management.
+
+Administrators can:
+
+- View all technologies
+- Create technologies
+- Edit existing technologies
+- Delete technologies
+- Assign a category
+- Set an icon URL
+- Control display order
+
+Technology categories use controlled CMS options:
+
+- Languages
+- Frontend
+- Backend
+- Database
+- Tools
+
+The Technologies CMS includes a responsive editing workflow, with a sticky form on larger screens and mobile-friendly editing behavior on smaller screens.
+
+### Technology CRUD Validation
+
+A disposable technology record was used to verify the complete management lifecycle.
+
+The following workflow passed:
+
+`Create → Read → Edit → Persist → Delete`
+
+The temporary technology was removed after testing, leaving the original technology data intact.
+
+### Project Images CMS
+
+Project image management was integrated directly into the protected project edit workflow.
+
+Administrators can:
+
+- Upload project images
+- Add alt text
+- Add image captions
+- Control image display order
+- Select a project cover image
+- Update existing image metadata
+- Delete project images
+
+Images are uploaded to Cloudinary and their metadata is stored in PostgreSQL.
+
+The client API request helper was also updated to support `FormData` uploads without manually setting the JSON `Content-Type`, allowing the browser to generate the required multipart boundary.
+
+### Cover Image Management
+
+Projects support a single active cover image.
+
+When an administrator selects a new cover image:
+
+- The previous cover is automatically unset
+- The new image becomes the active cover
+- The CMS updates immediately
+- The selection persists after refresh
+- The public portfolio uses the newly selected cover image
+
+This behavior was validated using the You Party – I Pour project.
+
+### Project Image CRUD Validation
+
+The following image-management workflow passed:
+
+`Upload → Read → Edit Metadata → Set Cover → Replace Cover → Delete`
+
+Validation also confirmed:
+
+- Image metadata persists after refresh
+- Display order persists
+- Cover status persists
+- Only one cover image remains active
+- Public project cards use the active cover image
+- Deleted images do not return after refresh
+- Deleting a non-cover image does not affect the current cover image
+
+### Messages CMS
+
+The protected `/admin/messages` area now functions as a portfolio contact-message inbox.
+
+The message list displays:
+
+- Sender name
+- Email address
+- Subject
+- Submission date and time
+- Read / unread status
+- View Message action
+
+Unread messages receive additional visual emphasis so new inquiries can be identified quickly.
+
+### Message Details
+
+The `/admin/messages/:id` route provides the complete contact message.
+
+Administrators can:
+
+- View sender information
+- View the complete message
+- View the submission date and time
+- Mark a message as read
+- Mark a message as unread
+- Delete a message
+- Return to the message inbox
+
+Email addresses are also presented as direct email links for convenient follow-up.
+
+### Message CRUD Validation
+
+Contact messages are created through the public portfolio contact form and managed through the protected Admin CMS.
+
+The complete workflow passed:
+
+`Create → Read → Mark Read/Unread → Persist → Delete`
+
+Delete confirmation was tested for both cancellation and confirmed deletion.
+
+Deleted messages remained deleted after refresh.
+
+### Responsive CMS
+
+All three Phase 16 management areas were tested on desktop and mobile layouts.
+
+Responsive validation included:
+
+- Technologies management
+- Technology editing
+- Project image uploads
+- Project image metadata controls
+- Project image actions
+- Messages inbox
+- Message details
+- Read / unread controls
+- Delete actions
+- Long message and email content
+- Responsive action buttons
+
+### Phase 16 Validation
+
+Phase 16 passed:
+
+- Technologies CRUD testing
+- Technology category testing
+- Technology persistence testing
+- Project image upload testing
+- Project image metadata testing
+- Cover image selection testing
+- Single-cover exclusivity testing
+- Public cover image integration testing
+- Project image deletion testing
+- Contact message list testing
+- Contact message detail testing
+- Read / unread persistence testing
+- Message delete confirmation testing
+- Message deletion testing
+- Desktop responsive testing
+- Mobile responsive testing
+- ESLint validation
+- Vite production build validation
+- Git whitespace validation
+
+### Phase 16 Status
+
+```text
+Technologies CMS                    ✅
+Technology create                   ✅
+Technology edit                     ✅
+Technology delete                   ✅
+Technology categories               ✅
+Technology display order            ✅
+Project Images CMS                  ✅
+Cloudinary image upload             ✅
+Image metadata management           ✅
+Image display order                 ✅
+Cover image management              ✅
+Single-cover enforcement            ✅
+Public cover image integration      ✅
+Project image deletion              ✅
+Messages CMS                        ✅
+Message inbox                       ✅
+Message details                     ✅
+Read / unread management            ✅
+Message deletion                    ✅
+Desktop responsive testing          ✅
+Mobile responsive testing           ✅
+ESLint                              ✅
+Production build                    ✅
+Git whitespace validation           ✅
+```
+
+Phase 16 is complete.
+
+Phase 17 will integrate the Snake game into the portfolio.
