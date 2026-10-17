@@ -441,7 +441,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 14 — Admin CMS Foundation
 - [x] Phase 15 — Project Management CMS
 - [x] Phase 16 — Technologies, Images & Messages CMS
-- [ ] Phase 17 — Snake Game Integration
+- [x] Phase 17 — Snake Game Integration
 - [ ] Phase 18 — Testing, Polish & Deployment
 
 ---
@@ -830,61 +830,15 @@ The project now has:
 
 **Complete ✅**
 
-The Admin CMS now includes complete management workflows for technologies, project images, and portfolio contact messages.
+### Phase 17 — Snake Game Integration
 
-The application now includes:
+**Complete ✅**
 
-- Protected administrator technology management
-- Create technology workflow
-- Edit technology workflow
-- Delete technology workflow
-- Controlled technology category selection
-- Technology icon URL management
-- Technology display order management
-- Responsive technology-management interface
-- Cloudinary project image uploads
-- Project image alt text management
-- Project image caption management
-- Project image display order management
-- Project cover image selection
-- Single-cover enforcement
-- Project image metadata editing
-- Project image deletion with confirmation
-- Public portfolio cover image integration
-- Protected administrator message inbox
-- Contact message detail view
-- Read / unread message management
-- Message status persistence
-- Contact message deletion with confirmation
-- Responsive Messages CMS
-- Desktop CMS testing
-- Mobile CMS testing
-- Complete CRUD validation
-- Successful ESLint validation
-- Successful Vite production build validation
-- Successful Git whitespace validation
+The Venom-Sprint project record uses this internal path as its live URL. The project case-study modal recognizes portfolio-hosted `/games/` destinations and displays a `Play Game` action instead of the standard `View Live Site` action.
 
-Technology categories are managed through the following controlled options:
+The Admin Project form now supports both external live URLs and internal portfolio paths.
 
-- Languages
-- Frontend
-- Backend
-- Database
-- Tools
-
-Project images are uploaded to Cloudinary while image metadata is stored in PostgreSQL.
-
-Each project supports a single active cover image. Selecting a new cover automatically removes the cover status from the previous image, and the active cover image is used by the public portfolio.
-
-Contact messages submitted through the public portfolio are now manageable through the protected Admin CMS. Administrators can review complete messages, mark them as read or unread, and permanently delete them.
-
-Phase 16 completed all three planned CMS areas:
-
-- **16A — Technologies CMS**
-- **16B — Project Images CMS**
-- **16C — Messages CMS**
-
-**Next:** Phase 17 — Snake Game Integration
+**Next:** Phase 18 — Testing, Polish & Deployment
 
 
 Current backend capabilities include:
@@ -6179,3 +6133,198 @@ Git whitespace validation           ✅
 Phase 16 is complete.
 
 Phase 17 will integrate the Snake game into the portfolio.
+
+
+---
+
+## Phase 17 — Snake Game Integration
+
+Phase 17 integrated Venom-Sprint into the portfolio as a playable browser game while preserving the game's existing vanilla JavaScript architecture.
+
+### Venom-Sprint Architecture
+
+Venom-Sprint remains a standalone frontend application built with:
+
+- Vanilla JavaScript
+- ES modules
+- HTML5 Canvas
+- CSS3
+- Browser local storage
+- Web Audio functionality
+
+The existing modular game architecture was preserved rather than rewritten in React.
+
+The game includes dedicated modules for:
+
+- Application orchestration
+- Game state and lifecycle
+- Snake behavior
+- Food behavior
+- Canvas rendering
+- Keyboard and mobile controls
+- Audio
+- Player settings
+- Browser storage
+- Game configuration
+
+### Portfolio Game Deployment
+
+A deployable copy of Venom-Sprint was added under:
+
+```text
+client/public/games/venom-sprint/
+```
+
+The deployed game includes:
+
+```text
+index.html
+css/
+js/
+assets/
+```
+
+The original standalone Venom-Sprint repository remains separate from the portfolio integration.
+
+The game is accessible through:
+
+```text
+/games/venom-sprint/index.html
+```
+
+Using the explicit `index.html` path ensures the standalone game document is served instead of the React SPA fallback during development.
+
+### Project Case Study Integration
+
+The existing Venom-Sprint project record is used by the API-driven Projects section and case-study system.
+
+Its live URL is:
+
+```text
+/games/venom-sprint/index.html
+```
+
+`ProjectCaseStudyModal` now detects live URLs beginning with:
+
+```text
+/games/
+```
+
+Portfolio-hosted games display:
+
+```text
+Play Game ↗
+```
+
+instead of:
+
+```text
+View Live Site ↗
+```
+
+Normal deployed applications continue to use the standard live-site action.
+
+The game opens in a new browser tab, keeping the portfolio session intact.
+
+### Admin CMS Internal URL Support
+
+The Admin Project form previously used the browser's `url` input type for the Live URL field.
+
+Because native URL validation rejects relative paths such as:
+
+```text
+/games/venom-sprint/index.html
+```
+
+the Live URL field was updated to support both external URLs and internal portfolio paths.
+
+Examples include:
+
+```text
+https://example.com
+/games/example/index.html
+```
+
+GitHub URLs continue to use normal absolute URL validation.
+
+### Desktop Gameplay Validation
+
+The portfolio-hosted Venom-Sprint integration was tested successfully for:
+
+- Game launch
+- Splash screen
+- Space Bar start
+- Keyboard movement
+- Food collection
+- Score updates
+- High-score behavior
+- Pause
+- Resume
+- Restart
+- End game
+- Help modal
+- Settings modal
+- Sound toggle
+- Game-over result
+- Play Again workflow
+
+### Mobile Gameplay Validation
+
+The integrated game was also tested successfully on a phone.
+
+Validated mobile behavior includes:
+
+- Responsive game presentation
+- Tap-to-start workflow
+- Directional touch controls
+- Score and status readability
+- Restart control
+- Pause / resume control
+- End-game control
+- Help modal
+- Settings modal
+- Sound control
+- Game-over result
+- Play Again workflow
+- No major layout overflow or unusable controls
+
+### Phase 17 Validation
+
+Phase 17 passed:
+
+```text
+ESLint validation
+Vite production build
+Git whitespace validation
+Desktop gameplay testing
+Mobile gameplay testing
+Portfolio-to-game launch testing
+```
+
+The production client build completed successfully with:
+
+```text
+54 modules transformed
+```
+
+### Phase 17 Status
+
+- [x] Inspect existing Venom-Sprint architecture
+- [x] Preserve vanilla JavaScript implementation
+- [x] Add deployable game to portfolio
+- [x] Preserve required assets
+- [x] Configure internal game live URL
+- [x] Support internal URLs in Admin Project CMS
+- [x] Add dynamic Play Game case-study action
+- [x] Verify standalone game launch
+- [x] Verify desktop gameplay
+- [x] Verify mobile gameplay
+- [x] Verify game controls and modals
+- [x] Verify sound functionality
+- [x] Run ESLint
+- [x] Run production build
+- [x] Run Git whitespace validation
+
+Phase 17 is complete.
+
+Phase 18 will complete final testing, polish, and deployment.

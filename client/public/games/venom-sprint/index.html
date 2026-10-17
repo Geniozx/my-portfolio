@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+      name="description"
+      content="Venom-Sprint — A modern arcade-style Snake game built with vanilla JavaScript, HTML5, and CSS3."
+    >
+
+    <title>Venom-Sprint | Neon Arcade Snake Game</title>
+
+    <link rel="stylesheet" href="./css/style.css">
+  </head>
+
+  <body>
+    <header class="game-header">
+      <p class="game-header__eyebrow">THE NEON ARCADE EXPERIENCE</p>
+
+      <h1 class="game-header__title">
+        VENOM<span>SPRINT</span>
+      </h1>
+
+      <p class="game-header__subtitle">
+        Slither. Survive. Dominate.
+      </p>
+    </header>
+
+    <main class="game-main">
+      <div id="gameContainer">
+        <div id="gameBoardWrapper">
+          <!-- Splash image shown before game starts -->
+          <img
+            id="splashImage"
+            src="./assets/images/Neon Venom Sprint Arcade Splash.png"
+            alt="Venom-Sprint game logo"
+          >
+
+          <canvas
+            id="gameBoard"
+            width="400"
+            height="400"
+            style="display:none;"
+          >
+            Your browser does not support HTML5 Canvas.
+          </canvas>
+
+          <!-- Start instruction overlay -->
+          <div id="startText">
+
+            <!-- Desktop instruction -->
+            <p class="start-text__desktop">
+              Press <b>Space Bar</b> to Start
+            </p>
+
+            <!-- Mobile start button -->
+            <button
+              type="button"
+              id="mobileStartBtn"
+              class="start-text__mobile"
+            >
+              Tap Here to Start
+            </button>
+
+          </div>
+
+          <!-- Game-over and victory overlay -->
+          <div
+            id="resultOverlay"
+            class="result-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="resultTitle"
+            hidden
+          >
+            <div class="result-overlay__content">
+              <p class="result-overlay__eyebrow">
+                VENOM-SPRINT
+              </p>
+
+              <h2 id="resultTitle">Game Over</h2>
+
+              <p id="resultMessage">
+                Your run has ended.
+              </p>
+
+              <p class="result-overlay__score">
+                Final Score:
+                <span id="resultScore">0</span>
+              </p>
+
+              <button type="button" id="playAgainBtn">
+                Play Again
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scoreboard -->
+        <div id="scoreBoard">
+          <p id="score">Score: 0</p>
+          <p id="highScore">High Score: 0</p>
+        </div>
+
+        <!-- Current gameplay status -->
+        <div
+          id="gameStatus"
+          class="game-status game-status--ready"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <span class="game-status__dot" aria-hidden="true"></span>
+          <span id="gameStatusText">READY</span>
+        </div>
+
+        <!-- Mobile directional controls -->
+        <div
+          id="mobileControls"
+          class="mobile-controls"
+          role="group"
+          aria-label="Snake movement controls"
+        >
+          <button
+            type="button"
+            class="mobile-controls__button mobile-controls__button--up"
+            data-direction="up"
+            aria-label="Move up"
+          >
+            ▲
+          </button>
+
+          <button
+            type="button"
+            class="mobile-controls__button mobile-controls__button--left"
+            data-direction="left"
+            aria-label="Move left"
+          >
+            ◀
+          </button>
+
+          <button
+            type="button"
+            class="mobile-controls__button mobile-controls__button--down"
+            data-direction="down"
+            aria-label="Move down"
+          >
+            ▼
+          </button>
+
+          <button
+            type="button"
+            class="mobile-controls__button mobile-controls__button--right"
+            data-direction="right"
+            aria-label="Move right"
+          >
+            ▶
+          </button>
+        </div>
+
+        <div id="controls">
+          <button type="button" id="restartBtn">Restart</button>
+          <button type="button" id="pauseBtn">Pause</button>
+          <button type="button" id="endBtn">End</button>
+          <button type="button" id="helpBtn">Help</button>
+          <button type="button" id="settingsBtn">Settings</button>
+
+          <!-- Sound toggle -->
+          <button
+            type="button"
+            id="soundBtn"
+            aria-label="Mute sound"
+            aria-pressed="false"
+            title="Mute sound"
+          >
+            🔊
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Help Modal -->
+    <div
+      id="helpModal"
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="helpModalTitle"
+    >
+      <div class="modal-content">
+        <button
+          type="button"
+          class="close"
+          aria-label="Close help"
+        >
+          &times;
+        </button>
+        <h2 id="helpModalTitle">How to Play</h2>
+        <p>Use the arrow keys to move the snake.</p>
+        <p>Eat food to grow longer and increase your score.</p>
+        <p>Avoid running into walls or yourself.</p>
+        <h3>Buttons</h3>
+        <ul>
+          <li><b>Restart</b>: Start a new game</li>
+          <li><b>Pause / Resume</b>: Pause or continue gameplay</li>
+          <li><b>End</b>: Stop the current game</li>
+          <li><b>Help</b>: Open this modal</li>
+          <li><b>🔊 / 🔇</b>: Turn game sounds on or off</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Player Settings Modal -->
+    <div
+      id="settingsModal"
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settingsModalTitle"
+      hidden
+    >
+      <div class="modal-content">
+        <button
+          type="button"
+          id="closeSettingsBtn"
+          class="close"
+          aria-label="Close settings"
+        >
+          &times;
+        </button>
+
+        <h2 id="settingsModalTitle">Player Settings</h2>
+
+        <div class="settings-options">
+          <label for="showGridSetting">
+            <input
+              type="checkbox"
+              id="showGridSetting"
+              checked
+            />
+            Show Grid
+          </label>
+
+          <label for="visualEffectsSetting">
+            <input
+              type="checkbox"
+              id="visualEffectsSetting"
+              checked
+            />
+            Visual Effects
+          </label>
+        </div>
+
+        <p class="settings-note">
+          Your preferences are saved automatically.
+        </p>
+      </div>
+    </div>
+
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>

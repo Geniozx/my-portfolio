@@ -9,6 +9,9 @@ function ProjectCaseStudyModal({ project, onClose }) {
     const galleryImages =
         project?.images?.filter((image) => !image.is_cover) || [];
 
+    const isPlayableGame =
+        project?.live_url?.startsWith("/games/");
+
     useEffect(() => {
         if (!project) {
             return undefined;
@@ -153,7 +156,7 @@ function ProjectCaseStudyModal({ project, onClose }) {
                                     rel="noopener noreferrer"
                                     className="project-modal-action project-modal-action-primary"
                                 >
-                                    View Live Site
+                                    {isPlayableGame ? "Play Game" : "View Live Site"}
                                     <span aria-hidden="true">↗</span>
                                 </a>
                             )}

@@ -479,9 +479,10 @@ function AdminProjectForm() {
               <input
                 id="live_url"
                 name="live_url"
-                type="url"
+                type="text"
                 value={formData.live_url}
                 onChange={handleChange}
+                placeholder="https://example.com or /games/example/index.html"
               />
             </div>
 
