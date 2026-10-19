@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { sendContactMessage } from "../../services/contactService";
+import { sendContactMessage } from "../../services/contactService.js";
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -87,6 +87,7 @@ function Contact() {
                 placeholder="Your name"
                 value={formData.name}
                 onChange={handleChange}
+                maxLength={100}
                 required
               />
             </div>
@@ -100,6 +101,7 @@ function Contact() {
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={handleChange}
+                maxLength={255}
                 required
               />
             </div>
@@ -113,6 +115,7 @@ function Contact() {
                 placeholder="What would you like to discuss?"
                 value={formData.subject}
                 onChange={handleChange}
+                maxLength={200}
               />
             </div>
 
@@ -125,6 +128,7 @@ function Contact() {
                 placeholder="Tell me a little about your project or opportunity..."
                 value={formData.message}
                 onChange={handleChange}
+                maxLength={5000}
                 required
               />
             </div>

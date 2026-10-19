@@ -6327,4 +6327,82 @@ The production client build completed successfully with:
 
 Phase 17 is complete.
 
-Phase 18 will complete final testing, polish, and deployment.
+Phase 18 continues with final testing, production hardening, polish, and deployment.
+
+
+---
+
+# Phase 18 — Testing, Polish & Deployment 🚧
+
+Phase 18 prepares the completed portfolio application for production release through full application auditing, UI/UX and accessibility refinement, security hardening, content review, deployment, and final production QA.
+
+Phase 18 is not considered complete until the deployed application passes final production testing.
+
+## Phase 18A — Full Application Audit ✅
+
+A full application audit was completed across the public portfolio, administrator CMS, API, database workflows, responsive layouts, and integrated Venom-Sprint game.
+
+Completed:
+
+- [x] Audit public portfolio navigation and sections
+- [x] Audit project case-study workflows
+- [x] Audit resume functionality
+- [x] Audit contact submission and administrator message management
+- [x] Audit administrator authentication
+- [x] Audit project CRUD workflows
+- [x] Audit project image management
+- [x] Audit technology management
+- [x] Audit Venom-Sprint integration
+- [x] Audit desktop and mobile behavior
+- [x] Audit API 404 and error behavior
+- [x] Remove temporary QA data after testing
+- [x] Run ESLint
+- [x] Run production build
+- [x] Run Git whitespace validation
+
+The audit confirmed that the primary application workflows are functioning correctly.
+
+One active-session authentication issue was identified for production hardening: an invalid or expired JWT encountered during an authenticated API request does not yet automatically clear the administrator session and redirect to the login page. This is scheduled for Phase 18C.
+
+## Phase 18B — UI/UX & Accessibility Polish ✅
+
+Phase 18B refined keyboard accessibility, motion preferences, loading feedback, form validation, and administrator upload behavior without changing the established visual direction of the portfolio.
+
+Completed:
+
+- [x] Add consistent `:focus-visible` styling for interactive controls
+- [x] Add `prefers-reduced-motion` support
+- [x] Add Escape-key support and focus restoration to the mobile navigation
+- [x] Replace global project loading behavior with per-project loading feedback
+- [x] Restrict administrator project image selection to JPEG, PNG, and WebP
+- [x] Align Contact form browser limits with API validation
+- [x] Add a 5,000-character server-side Contact message limit
+- [x] Add skip-to-main-content keyboard navigation
+- [x] Verify semantic headings, form labels, navigation landmarks, status messaging, and project image alternative text behavior
+- [x] Verify desktop and mobile keyboard behavior
+- [x] Verify reduced-motion behavior
+- [x] Run ESLint
+- [x] Run production build
+- [x] Run server syntax validation
+- [x] Run Git whitespace validation
+
+Contact input limits are now consistently enforced across the browser and API:
+
+```text
+Name:     100 characters
+Email:    255 characters
+Subject:  200 characters
+Message:  5000 characters
+
+
+```
+
+Phase 18B is complete.
+
+## Remaining Phase 18 Work
+
+- [ ] Phase 18C — Production & Security Audit
+- [ ] Phase 18D — Portfolio Content Audit
+- [ ] Phase 18E — Deployment
+- [ ] Phase 18F — Production QA
+- [ ] Phase 18G — Final Documentation & Release

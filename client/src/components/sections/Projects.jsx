@@ -11,7 +11,7 @@ function Projects() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedProject, setSelectedProject] = useState(null);
-  const [projectLoading, setProjectLoading] = useState(false);
+  const [loadingProjectSlug, setLoadingProjectSlug] = useState(null);
   const [projectError, setProjectError] = useState("");
 
   const triggerButtonRef = useRef(null);
@@ -34,7 +34,7 @@ function Projects() {
   async function handleViewCaseStudy(slug, triggerButton) {
     triggerButtonRef.current = triggerButton;
 
-    setProjectLoading(true);
+    setLoadingProjectSlug(slug);
     setProjectError("");
 
     try {
@@ -43,7 +43,7 @@ function Projects() {
     } catch (err) {
       setProjectError(err.message);
     } finally {
-      setProjectLoading(false);
+      setLoadingProjectSlug(null);
     }
   }
 
@@ -144,9 +144,11 @@ function Projects() {
                     onClick={(event) =>
                       handleViewCaseStudy(project.slug, event.currentTarget)
                     }
-                    disabled={projectLoading}
+                    disabled={loadingProjectSlug === project.slug}
                   >
-                    View Case Study
+                    {loadingProjectSlug === project.slug
+                      ? "Loading Case Study..."
+                      : "View Case Study"}
                     <span aria-hidden="true">→</span>
                   </button>
                 </div>

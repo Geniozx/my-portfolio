@@ -5,6 +5,10 @@ import Navbar from "../layout/Navbar.jsx";
 function PublicLayout() {
   return (
     <div className="public-layout">
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
+
       <Navbar />
 
       <Outlet />

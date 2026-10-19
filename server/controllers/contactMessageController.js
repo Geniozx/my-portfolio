@@ -52,6 +52,12 @@ async function createContactMessage(req, res, next) {
         });
     }
 
+    if (trimmedMessage.length > 5000) {
+        return res.status(400).json({
+            error: "Message must be 5000 characters or fewer.",
+        });
+    }
+
   try {
     const result = await pool.query(
       `

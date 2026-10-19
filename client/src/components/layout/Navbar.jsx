@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const navLinks = [
     { label: "Home", href: "#home" },
@@ -12,6 +12,8 @@ const navLinks = [
 function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [activeSection, setActiveSection] = useState("home");
+
+    const menuToggleRef = useRef(null);
 
     function handleNavClick(sectionId) {
         setActiveSection(sectionId);
@@ -64,6 +66,26 @@ function Navbar() {
         };
     }, []);
 
+
+    useEffect(() => {
+        if (!menuOpen) {
+            return;
+        }
+
+        function handleEscape(event) {
+            if (event.key === "Escape") {
+                setMenuOpen(false);
+                menuToggleRef.current?.focus();
+            }
+        }
+
+        document.addEventListener("keydown", handleEscape);
+
+        return () => {
+            document.removeEventListener("keydown", handleEscape);
+        };
+    }, [menuOpen]);
+
     return (
         <header className="site-header">
             <nav className="navbar" aria-label="Primary navigation">
@@ -76,6 +98,7 @@ function Navbar() {
                 </a>
 
                 <button
+                    ref={menuToggleRef}
                     className="navbar-toggle"
                     type="button"
                     aria-label="Toggle navigation menu"

@@ -598,7 +598,7 @@ function AdminProjectForm() {
                   <input
                     id="project-image-file"
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     onChange={(event) =>
                       setImageFile(event.target.files?.[0] || null)
                     }

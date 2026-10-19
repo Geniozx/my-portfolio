@@ -7,7 +7,7 @@ import Skills from "../components/sections/Skills.jsx";
 
 function Home() {
   return (
-    <main className="portfolio-main">
+    <main id="main-content" className="portfolio-main">
       <Hero />
       <About />
       <Skills />
