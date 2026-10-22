@@ -1,5 +1,7 @@
 const express = require("express");
 
+const validateId = require("../middleware/validateId");
+
 const {
   getAllTechnologies,
   createTechnology,
@@ -15,7 +17,7 @@ router.use(verifyToken);
 
 router.get("/", getAllTechnologies);
 router.post("/", createTechnology);
-router.patch("/:id", updateTechnology);
-router.delete("/:id", deleteTechnology);
+router.patch("/:id", validateId(), updateTechnology);
+router.delete("/:id", validateId(), deleteTechnology);
 
 module.exports = router;

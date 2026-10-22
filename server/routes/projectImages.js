@@ -1,7 +1,11 @@
 const express = require("express");
 
 const verifyToken = require("../middleware/verifyToken");
+
 const upload = require("../middleware/upload");
+
+const validateId = require("../middleware/validateId");
+
 const {
   createProjectImage,
   updateProjectImage,
@@ -11,6 +15,7 @@ const {
 const router = express.Router({ mergeParams: true });
 
 router.use(verifyToken);
+router.use(validateId("id"));
 
 router.post(
   "/",
@@ -20,11 +25,13 @@ router.post(
 
 router.patch(
   "/:imageId",
+  validateId("imageId"),
   updateProjectImage
 );
 
 router.delete(
   "/:imageId",
+  validateId("imageId"),
   removeProjectImage
 );
 

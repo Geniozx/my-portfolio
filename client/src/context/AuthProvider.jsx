@@ -29,6 +29,25 @@ function AuthProvider({ children }) {
     restoreAdmin();
   }, []);
 
+  useEffect(() => {
+    function handleSessionExpired() {
+      localStorage.removeItem("adminToken");
+      setAdmin(null);
+    }
+
+    window.addEventListener(
+      "admin-session-expired",
+      handleSessionExpired,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "admin-session-expired",
+        handleSessionExpired,
+      );
+    };
+  }, []);
+
   function login(adminData, token) {
     localStorage.setItem("adminToken", token);
     setAdmin(adminData);

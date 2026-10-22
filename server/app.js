@@ -2,11 +2,17 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 
+const helmet = require("helmet");
+
 const apiRouter = require("./routes");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
+
+app.disable("x-powered-by");
+
+app.use(helmet());
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -20,7 +26,10 @@ app.use(
         return callback(null, true);
       }
 
-      return callback(new Error("Not allowed by CORS"));
+      const error = new Error("Origin not allowed.");
+      error.statusCode = 403;
+
+      return callback(error);
     },
   })
 );

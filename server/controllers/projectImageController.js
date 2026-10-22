@@ -5,6 +5,10 @@ const {
   deleteProjectImage,
 } = require("../services/cloudinaryService");
 
+const {
+  isNullableStringWithinLength,
+} = require("../utils/validation");
+
 async function createProjectImage(req, res, next) {
   const { id: projectId } = req.params;
   const {
@@ -20,6 +24,24 @@ async function createProjectImage(req, res, next) {
     req.body.display_order !== undefined
       ? Number(req.body.display_order)
       : 0;
+
+  if (!isNullableStringWithinLength(alt_text, 255)) {
+    return res.status(400).json({
+      error: "alt_text must be 255 characters or fewer.",
+    });
+  }
+
+  if (
+    req.body.is_cover !== undefined &&
+    req.body.is_cover !== true &&
+    req.body.is_cover !== false &&
+    req.body.is_cover !== "true" &&
+    req.body.is_cover !== "false"
+  ) {
+    return res.status(400).json({
+      error: "is_cover must be a boolean value.",
+    });
+  }
 
   if (!req.file) {
     return res.status(400).json({
@@ -138,6 +160,29 @@ async function updateProjectImage(req, res, next) {
     });
   }
 
+  const updateData = Object.fromEntries(updates);
+
+  if (
+    "alt_text" in updateData &&
+    !isNullableStringWithinLength(updateData.alt_text, 255)
+  ) {
+    return res.status(400).json({
+      error: "alt_text must be 255 characters or fewer.",
+    });
+  }
+
+  if (
+    "is_cover" in updateData &&
+    updateData.is_cover !== true &&
+    updateData.is_cover !== false &&
+    updateData.is_cover !== "true" &&
+    updateData.is_cover !== "false"
+  ) {
+    return res.status(400).json({
+      error: "is_cover must be a boolean value.",
+    });
+  }
+
   const normalizedUpdates = updates.map(([key, value]) => {
     if (key === "is_cover") {
       return [
@@ -250,31 +295,6 @@ async function removeProjectImage(req, res, next) {
   const { id: projectId, imageId } = req.params;
 
   try {
-    const imageResult = await pool.query(
-      `
-        SELECT
-          id,
-          project_id,
-          public_id
-        FROM project_images
-        WHERE id = $1
-        AND project_id = $2
-      `,
-      [imageId, projectId]
-    );
-
-    const image = imageResult.rows[0];
-
-    if (!image) {
-      return res.status(404).json({
-        error: "Project image not found.",
-      });
-    }
-
-    if (image.public_id) {
-      await deleteProjectImage(image.public_id);
-    }
-
     const result = await pool.query(
       `
         DELETE FROM project_images
@@ -294,9 +314,28 @@ async function removeProjectImage(req, res, next) {
       [imageId, projectId]
     );
 
+    const image = result.rows[0];
+
+    if (!image) {
+      return res.status(404).json({
+        error: "Project image not found.",
+      });
+    }
+
+    if (image.public_id) {
+      try {
+        await deleteProjectImage(image.public_id);
+      } catch (cloudinaryError) {
+        console.error(
+          "Cloudinary image cleanup failed:",
+          cloudinaryError
+        );
+      }
+    }
+
     return res.status(200).json({
       message: "Project image deleted successfully.",
-      image: result.rows[0],
+      image,
     });
   } catch (error) {
     next(error);

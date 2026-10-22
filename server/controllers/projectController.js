@@ -4,6 +4,14 @@ const {
   deleteProjectImage,
 } = require("../services/cloudinaryService");
 
+const {
+  isNonEmptyString,
+  isStringWithinLength,
+  isNullableStringWithinLength,
+  isBoolean,
+  isInteger,
+} = require("../utils/validation");
+
 async function getPublishedProjects(req, res, next) {
   try {
     const result = await pool.query(`
@@ -298,10 +306,47 @@ async function createProject(req, res, next) {
         display_order = 0,
     } = req.body;
 
-    if (!title || !slug || !short_description) {
-        return res.status(400).json({
-            error: "Title, slug, and short description are required.",
-        });
+    if (
+      !isNonEmptyString(title) ||
+      !isNonEmptyString(slug) ||
+      !isNonEmptyString(short_description)
+    ) {
+      return res.status(400).json({
+        error: "Title, slug, and short description are required.",
+      });
+    }
+
+    if (
+      !isStringWithinLength(title, 150) ||
+      !isStringWithinLength(slug, 150)
+    ) {
+      return res.status(400).json({
+        error: "Title and slug must be 150 characters or fewer.",
+      });
+    }
+
+    if (!isNullableStringWithinLength(project_type, 50)) {
+      return res.status(400).json({
+        error: "Project type must be 50 characters or fewer.",
+      });
+    }
+
+    if (!isNullableStringWithinLength(status, 50)) {
+      return res.status(400).json({
+        error: "Status must be 50 characters or fewer.",
+      });
+    }
+
+    if (!isBoolean(featured) || !isBoolean(published)) {
+      return res.status(400).json({
+        error: "Featured and published must be boolean values.",
+      });
+    }
+
+    if (!isInteger(display_order)) {
+      return res.status(400).json({
+        error: "Display order must be an integer.",
+      });
     }
 
   try {
@@ -412,6 +457,58 @@ async function updateProject(req, res, next) {
   if (updates.length === 0) {
     return res.status(400).json({
       error: "At least one valid field is required.",
+    });
+  }
+
+  const updateData = Object.fromEntries(updates);
+
+  if (
+    ("title" in updateData &&
+      !isStringWithinLength(updateData.title, 150)) ||
+    ("slug" in updateData &&
+      !isStringWithinLength(updateData.slug, 150)) ||
+    ("short_description" in updateData &&
+      !isNonEmptyString(updateData.short_description))
+  ) {
+    return res.status(400).json({
+      error:
+        "Title, slug, and short description must be valid non-empty strings.",
+    });
+  }
+
+  if (
+    "project_type" in updateData &&
+    !isNullableStringWithinLength(updateData.project_type, 50)
+  ) {
+    return res.status(400).json({
+      error: "Project type must be 50 characters or fewer.",
+    });
+  }
+
+  if (
+    "status" in updateData &&
+    !isNullableStringWithinLength(updateData.status, 50)
+  ) {
+    return res.status(400).json({
+      error: "Status must be 50 characters or fewer.",
+    });
+  }
+
+  if (
+    ("featured" in updateData && !isBoolean(updateData.featured)) ||
+    ("published" in updateData && !isBoolean(updateData.published))
+  ) {
+    return res.status(400).json({
+      error: "Featured and published must be boolean values.",
+    });
+  }
+
+  if (
+    "display_order" in updateData &&
+    !isInteger(updateData.display_order)
+  ) {
+    return res.status(400).json({
+      error: "Display order must be an integer.",
     });
   }
 

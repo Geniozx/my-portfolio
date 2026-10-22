@@ -1,5 +1,11 @@
 const pool = require("../db/pool");
 
+const {
+  isStringWithinLength,
+  isNullableStringWithinLength,
+  isInteger,
+} = require("../utils/validation");
+
 async function getAllTechnologies(req, res, next) {
   try {
     const result = await pool.query(`
@@ -29,9 +35,19 @@ async function createTechnology(req, res, next) {
     display_order = 0,
   } = req.body;
 
-  if (!name || !category) {
+  if (
+    !isStringWithinLength(name, 100) ||
+    !isStringWithinLength(category, 50)
+  ) {
     return res.status(400).json({
-      error: "Name and category are required.",
+      error:
+        "Name and category are required and must be within their allowed lengths.",
+    });
+  }
+
+  if (!isInteger(display_order)) {
+    return res.status(400).json({
+      error: "Display order must be an integer.",
     });
   }
 
@@ -86,6 +102,33 @@ async function updateTechnology(req, res, next) {
   ) {
     return res.status(400).json({
       error: "At least one field is required.",
+    });
+  }
+
+  if (
+    name !== undefined &&
+    !isStringWithinLength(name, 100)
+  ) {
+    return res.status(400).json({
+      error: "Name must be a non-empty string of 100 characters or fewer.",
+    });
+  }
+
+  if (
+    category !== undefined &&
+    !isNullableStringWithinLength(category, 50)
+  ) {
+    return res.status(400).json({
+      error: "Category must be 50 characters or fewer.",
+    });
+  }
+
+  if (
+    display_order !== undefined &&
+    !isInteger(display_order)
+  ) {
+    return res.status(400).json({
+      error: "Display order must be an integer.",
     });
   }
 

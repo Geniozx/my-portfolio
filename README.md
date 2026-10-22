@@ -6399,9 +6399,71 @@ Message:  5000 characters
 
 Phase 18B is complete.
 
+## Phase 18C — Production & Security Audit ✅
+
+Phase 18C hardened the portfolio application for production by strengthening authentication behavior, API validation, HTTP security, rate limiting, environment configuration, error handling, and external asset cleanup.
+
+Completed:
+
+- [x] Add centralized handling for expired or invalid administrator sessions
+- [x] Automatically clear invalid administrator tokens and return protected routes to the login page
+- [x] Replace unexpected internal error details with generic production-safe `500` responses
+- [x] Add targeted authentication rate limiting
+- [x] Limit failed administrator login attempts to 10 per 15-minute window
+- [x] Exclude successful administrator logins from the failed-login rate limit
+- [x] Limit Contact form submissions to 5 per 15-minute window
+- [x] Return `403 Forbidden` for rejected CORS origins
+- [x] Disable the Express `X-Powered-By` response header
+- [x] Add Helmet HTTP security headers
+- [x] Add positive-integer validation for numeric route parameters
+- [x] Add schema-aware validation for project fields
+- [x] Add schema-aware validation for technology fields
+- [x] Add project image metadata and display-order validation
+- [x] Improve project image deletion consistency by removing database records before best-effort Cloudinary cleanup
+- [x] Add fail-fast validation for required production environment variables
+- [x] Confirm private `.env` configuration is excluded from Git
+- [x] Confirm only safe `.env.example` placeholders are tracked
+- [x] Run ESLint
+- [x] Run production build
+- [x] Run server-wide JavaScript syntax validation
+- [x] Run production dependency security audit
+- [x] Run Git whitespace validation
+- [x] Run targeted authenticated and unauthenticated API regression testing
+- [x] Verify CORS rejection behavior
+- [x] Verify Helmet security headers
+- [x] Verify `X-Powered-By` is not exposed
+
+### Production Security Validation
+
+Final Phase 18C validation confirmed:
+
+```text
+Public API request:                  200
+Authenticated administrator:        200
+Protected administrator API:        200
+Unauthenticated protected request:   401
+Rejected CORS origin:                403
+Malformed numeric route parameter:   400
+Missing project image:               404
+Production npm vulnerabilities:      0
+
+```
+
+Helmet security headers are active, approved development origins continue to receive the appropriate CORS header, and Express no longer exposes the `X-Powered-By` header.
+
+The production dependency audit reports zero vulnerabilities. A development-only advisory remains in the nodemon dependency chain; no forced dependency downgrade was applied because production dependencies are unaffected.
+
+PostgreSQL SSL configuration and reverse-proxy trust configuration remain deployment-provider-specific and will be finalized during Phase 18E.
+
+A fresh JWT signing secret must be configured before production deployment.
+
+Phase 18C is complete.
+
+
 ## Remaining Phase 18 Work
 
-- [ ] Phase 18C — Production & Security Audit
+
+- [x] Phase 18C — Production & Security Audit
 - [ ] Phase 18D — Portfolio Content Audit
 - [ ] Phase 18E — Deployment
 - [ ] Phase 18F — Production QA

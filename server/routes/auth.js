@@ -1,5 +1,7 @@
 const express = require("express");
 
+const { loginLimiter } = require("../middleware/rateLimiters");
+
 const {
   login,
   getCurrentAdmin,
@@ -9,7 +11,7 @@ const verifyToken = require("../middleware/verifyToken");
 
 const router = express.Router();
 
-router.post("/login", login);
+router.post("/login", loginLimiter, login);
 router.get("/me", verifyToken, getCurrentAdmin);
 
 module.exports = router;

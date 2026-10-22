@@ -1,5 +1,7 @@
 const express = require("express");
 
+const validateId = require("../middleware/validateId");
+
 const {
   getAllProjects,
   getProjectById,
@@ -16,10 +18,10 @@ const router = express.Router();
 router.use(verifyToken);
 
 router.get("/", getAllProjects);
-router.get("/:id", getProjectById);
+router.get("/:id", validateId(), getProjectById);
 router.post("/", createProject);
-router.patch("/:id", updateProject);
-router.delete("/:id", deleteProject);
-router.put("/:id/technologies", updateProjectTechnologies);
+router.patch("/:id", validateId(), updateProject);
+router.delete("/:id", validateId(), deleteProject);
+router.put("/:id/technologies", validateId(), updateProjectTechnologies);
 
 module.exports = router;

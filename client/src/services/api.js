@@ -17,5 +17,9 @@ export async function apiRequest(endpoint, options = {}) {
     headers,
   });
 
+  if (response.status === 401 && headers.Authorization) {
+    window.dispatchEvent(new Event("admin-session-expired"));
+  }
+
   return response;
 }
