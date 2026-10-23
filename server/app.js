@@ -12,6 +12,10 @@ const app = express();
 
 app.disable("x-powered-by");
 
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
 app.use(helmet());
 
 const allowedOrigins = [
