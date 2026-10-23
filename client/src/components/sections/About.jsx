@@ -37,22 +37,22 @@ function About() {
 
           <div className="about-copy">
             <p>
-              My path into software development is grounded in years of
-              professional experience where accuracy, problem-solving, and
-              attention to detail mattered every day. I now bring that same
-              mindset to building web applications.
+              My path into software development is grounded in years of professional
+              experience where accuracy, problem-solving, communication, and attention
+              to detail mattered every day. I bring that same mindset to building
+              reliable web applications.
             </p>
 
             <p>
-              I enjoy working across the full stack, turning an idea into a
-              responsive frontend, designing the API behind it, and connecting
-              everything to a reliable database.
+              I work across the full stack, building responsive React interfaces,
+              developing APIs with Node.js or Django, designing PostgreSQL-backed data
+              models, and connecting those pieces into complete applications.
             </p>
 
             <p>
-              My focus is continuing to grow as a developer while building
-              useful, polished applications that solve real problems for real
-              people and businesses.
+              I focus on practical software with real use cases—from business tools and
+              content management workflows to interactive applications—while continuing
+              to strengthen my engineering skills with every project I build.
             </p>
           </div>
         </div>

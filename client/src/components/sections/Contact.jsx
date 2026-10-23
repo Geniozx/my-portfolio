@@ -62,17 +62,17 @@ function Contact() {
             </h2>
 
             <p>
-              I'm interested in opportunities to build useful web
-              applications, collaborate on projects, and work with businesses
-              that need a strong web presence.
+              I'm interested in opportunities to build useful web applications,
+              contribute to growing teams, and help businesses turn ideas and
+              workflows into practical software.
             </p>
 
             <div className="contact-note">
               <span className="contact-note-marker" />
 
               <p>
-                Open to development opportunities, freelance projects, and
-                client work.
+                Open to developer roles, startup opportunities, freelance projects,
+                and client work.
               </p>
             </div>
           </div>

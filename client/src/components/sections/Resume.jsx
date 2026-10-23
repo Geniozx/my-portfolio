@@ -13,7 +13,8 @@ function Resume() {
           <p>
             My professional background taught me how to work accurately,
             communicate clearly, and solve problems under real-world
-            constraints. I now bring those skills into software development.
+            constraints. I bring those same skills to building reliable,
+            user-focused software.
           </p>
 
           <div className="resume-actions">
@@ -67,8 +68,8 @@ function Resume() {
               <p className="resume-item-label">Current Focus</p>
               <h3>Building Production-Ready Applications</h3>
               <p>
-                Expanding my portfolio through complete applications that solve
-                practical problems for users and businesses.
+                Building complete applications around practical problems, real
+                workflows, and the needs of users and businesses.
               </p>
             </div>
           </article>

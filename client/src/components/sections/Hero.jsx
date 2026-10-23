@@ -11,8 +11,9 @@ function Hero() {
           </h1>
 
           <p className="hero-description">
-            I build modern, responsive web applications with React,
-            Node.js, Python, and PostgreSQL.
+            I build responsive, full-stack web applications that combine polished
+            user experiences with practical APIs, databases, and business-focused
+            functionality.
           </p>
 
           <div className="hero-actions">
