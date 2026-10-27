@@ -1272,7 +1272,8 @@ a {
 .project-modal-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem 2rem;
+  gap: 1rem 3rem;
+  padding-bottom: 1rem;
 
   margin-top: 1.5rem;
 }

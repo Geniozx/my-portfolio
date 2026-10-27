@@ -6500,11 +6500,97 @@ This sequence demonstrates a completed full-stack product, a business-focused cl
 
 Phase 18D is complete.
 
-## Remaining Phase 18 Work
+## Phase 18E — Deployment ✅
 
+Phase 18E deployed the portfolio to a production architecture using Netlify for the React frontend, Heroku for the Node.js and Express API, Neon for PostgreSQL, and Cloudinary for project media.
+
+### Production Architecture
+
+```text
+Netlify
+React + Vite frontend
+        ↓
+Heroku
+Node.js + Express REST API
+        ↓
+Neon
+PostgreSQL database
+
+Cloudinary
+Project image storage and delivery
+```
+
+### Production URLs
+
+Frontend:
+
+```text
+https://eli-rodriguez-portfolio.netlify.app
+```
+
+API:
+
+```text
+https://eli-rodriguez-portfolio-api-34863b10298c.herokuapp.com
+```
+
+### Completed
+
+- [x] Create production PostgreSQL database with Neon
+- [x] Restore the portfolio schema and production data
+- [x] Verify production tables, relationships, and record counts
+- [x] Create and configure the Heroku API application
+- [x] Configure production environment variables
+- [x] Configure a fresh production JWT signing secret
+- [x] Configure production reverse-proxy trust
+- [x] Deploy the Express API to Heroku
+- [x] Upgrade the production runtime from Node.js 20 to Node.js 24 LTS
+- [x] Verify the live Heroku dyno is running Node.js 24.22.1
+- [x] Verify Heroku-to-Neon database connectivity
+- [x] Verify public projects and technologies API endpoints
+- [x] Verify individual project retrieval with associated images and technologies
+- [x] Add Netlify SPA fallback routing
+- [x] Run ESLint and the Vite production build
+- [x] Deploy the React frontend to Netlify
+- [x] Configure the production `VITE_API_BASE_URL`
+- [x] Configure the Netlify production origin as the API `CLIENT_URL`
+- [x] Verify production CORS between Netlify and Heroku
+- [x] Verify Cloudinary project images load in production
+- [x] Verify the production Skills and Projects sections load API data
+- [x] Verify project case-study content and media
+- [x] Verify the Venom-Sprint production game route
+- [x] Verify Venom-Sprint gameplay and direct-route refresh behavior
+- [x] Verify direct React Router navigation and hard refresh for `/admin/login`
+
+### Deployment Validation
+
+Production deployment testing confirmed:
+
+```text
+Frontend hosting:             Netlify
+API hosting:                  Heroku
+Database:                     Neon PostgreSQL
+Project media:                Cloudinary
+Production Node.js runtime:   24.22.1
+Projects API:                 200
+Technologies API:             200
+Individual project API:       200
+Netlify → Heroku CORS:        PASS
+Cloudinary media:             PASS
+Venom-Sprint route:           PASS
+React Router SPA fallback:    PASS
+```
+
+The deployed application now has a functioning production path from the Netlify frontend through the Heroku REST API to the Neon PostgreSQL database, with Cloudinary serving project media.
+
+Administrator authentication and complete production CRUD workflow testing will be performed during Phase 18F.
+
+Phase 18E is complete.
+
+## Remaining Phase 18 Work
 
 - [x] Phase 18C — Production & Security Audit
 - [x] Phase 18D — Portfolio Content Audit
-- [ ] Phase 18E — Deployment
+- [x] Phase 18E — Deployment
 - [ ] Phase 18F — Production QA
 - [ ] Phase 18G — Final Documentation & Release
