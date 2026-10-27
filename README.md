@@ -6587,10 +6587,163 @@ Administrator authentication and complete production CRUD workflow testing will 
 
 Phase 18E is complete.
 
+
+
+## Phase 18F — Production QA ✅
+
+Phase 18F validated the deployed portfolio across public functionality, administrator authentication, database operations, Cloudinary media management, API security, responsive design, and accessibility.
+
+Testing was performed against the live Netlify frontend, Heroku API, Neon PostgreSQL database, and Cloudinary integration.
+
+### Administrator Authentication & Session Management
+
+- [x] Verify production administrator login
+- [x] Verify successful redirect to `/admin`
+- [x] Verify authenticated dashboard rendering
+- [x] Verify session persistence after a hard refresh
+- [x] Verify administrator logout
+- [x] Verify unauthenticated access to `/admin` redirects to login
+- [x] Verify successful login after logout
+
+### Project CMS — CRUD
+
+- [x] Verify the three original portfolio projects load correctly
+- [x] Verify existing project details, statuses, technologies, and images
+- [x] Create an unpublished temporary QA project
+- [x] Verify the temporary project persists in the admin interface
+- [x] Update project title, description, status, display order, and technologies
+- [x] Verify updated project information persists after reopening
+- [x] Verify unpublished projects remain hidden from the public portfolio
+- [x] Delete the temporary QA project
+- [x] Verify the original three projects remain intact
+
+### Cloudinary Image Management
+
+- [x] Upload a temporary image through the production administrator interface
+- [x] Verify the image preview and Cloudinary delivery URL
+- [x] Verify the image persists after refreshing
+- [x] Update image alt text and caption
+- [x] Verify updated image metadata persists
+- [x] Delete the temporary image
+- [x] Verify the deleted image does not return after refreshing
+
+### Technology CMS — CRUD
+
+- [x] Verify all 12 original technologies and their categories
+- [x] Verify existing technology editor values
+- [x] Create a temporary QA technology
+- [x] Update its name, category, and display order
+- [x] Verify the updated values persist
+- [x] Delete the temporary technology
+- [x] Verify the original 12 technologies remain intact
+- [x] Verify the public Skills section remains functional
+
+### Contact Form & Admin Messages
+
+- [x] Submit a temporary message through the production Contact form
+- [x] Verify submission confirmation and normal form behavior
+- [x] Verify the message appears in the administrator message list
+- [x] Verify sender information, subject, and message content
+- [x] Mark the message as read
+- [x] Verify read status persists after refreshing
+- [x] Delete the temporary message
+- [x] Verify the message remains deleted after refreshing
+- [x] Verify browser validation for required fields
+- [x] Verify invalid email submissions are blocked
+- [x] Verify name and subject character limits
+- [x] Verify the form remains usable after validation errors
+
+### Production API & Security
+
+- [x] Verify invalid Contact API submissions return `400 Bad Request`
+- [x] Verify server-side validation error responses
+- [x] Verify the Contact API rate-limit policy is active
+- [x] Verify unauthorized CORS origins receive `403 Forbidden`
+- [x] Verify rejected origins do not receive an authorization CORS header
+- [x] Verify unauthenticated administrator API requests receive `401 Unauthorized`
+- [x] Verify invalid JWT requests receive `401 Unauthorized`
+- [x] Verify protected administrator data is not exposed
+- [x] Verify production security headers are present
+- [x] Verify API error responses do not expose internal server details
+
+### Public Frontend & Browser QA
+
+- [x] Verify Home, About, Skills, Projects, Resume, and Contact
+- [x] Verify public project cards and associated images
+- [x] Verify project case-study modals
+- [x] Verify normal public navigation produces no browser console errors
+- [x] Verify no unexpected failed API requests or mixed-content warnings
+
+### Mobile Responsiveness
+
+- [x] Verify mobile navigation and section links
+- [x] Verify Hero content and calls to action
+- [x] Verify About and Skills layouts
+- [x] Verify project cards and media
+- [x] Verify project modal scrolling and close controls
+- [x] Verify Resume and Contact usability
+- [x] Verify no unexpected horizontal scrolling
+- [x] Verify portrait and landscape layouts
+
+### Keyboard Accessibility & Reduced Motion
+
+- [x] Verify skip-to-main-content navigation
+- [x] Verify visible keyboard focus indicators
+- [x] Verify keyboard navigation through interactive controls
+- [x] Verify project modal keyboard access
+- [x] Verify modal focus trapping
+- [x] Verify Escape-key modal dismissal
+- [x] Verify focus restoration after closing modals
+- [x] Verify Contact form keyboard navigation
+- [x] Verify reduced-motion navigation behavior
+- [x] Verify project modals remain functional with reduced motion
+- [x] Verify content visibility and interaction under reduced-motion preferences
+
+### Final Production Build & Repository Validation
+
+- [x] Run ESLint successfully
+- [x] Run Vite production build successfully
+- [x] Verify 54 modules transformed during production build
+- [x] Run Git whitespace validation
+- [x] Verify the Git working tree is clean
+- [x] Verify `main` is synchronized with `origin/main`
+
+### Production QA Results
+
+```text
+Production administrator login:      PASS
+Administrator session/logout:        PASS
+Project CMS CRUD:                    PASS
+Cloudinary image management:         PASS
+Technology CMS CRUD:                 PASS
+Contact form submission:             PASS
+Admin message management:            PASS
+Contact form validation:             PASS
+Server-side API validation:          PASS
+CORS rejection:                      PASS
+Protected API authorization:         PASS
+Invalid JWT rejection:               PASS
+Public browser console audit:        PASS
+Mobile responsiveness:               PASS
+Keyboard accessibility:              PASS
+Reduced-motion accessibility:        PASS
+ESLint:                               PASS
+Vite production build:               PASS
+Git whitespace validation:           PASS
+```
+
+All temporary QA projects, technologies, images, and contact messages were removed following testing. The original portfolio content remains intact.
+
+No blocking issues were identified during the completed production QA checks.
+
+Phase 18F is complete.
+
+
+
 ## Remaining Phase 18 Work
 
 - [x] Phase 18C — Production & Security Audit
 - [x] Phase 18D — Portfolio Content Audit
 - [x] Phase 18E — Deployment
-- [ ] Phase 18F — Production QA
+- [x] Phase 18F — Production QA
 - [ ] Phase 18G — Final Documentation & Release
