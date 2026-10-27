@@ -1,8 +1,27 @@
 # Developer Portfolio
 
-A full-stack developer portfolio and custom admin CMS built to showcase my projects, technical skills, experience, and development process.
+A production-deployed full-stack developer portfolio and custom administration CMS built with React, Node.js, Express, and PostgreSQL.
 
-The portfolio is designed as both a professional portfolio and a full-stack application demonstrating frontend development, backend architecture, database design, authentication, API development, media management, and deployment.
+The application showcases my software development projects, technical skills, professional experience, and development process through an interactive single-page portfolio and detailed project case studies.
+
+Beyond the public-facing portfolio, the application includes a secure administrator interface for managing projects, technologies, Cloudinary-hosted images, and contact messages.
+
+## Live Application
+
+**Portfolio:** https://eli-rodriguez-portfolio.netlify.app/
+
+**GitHub Repository:** https://github.com/Geniozx/my-portfolio
+
+### Production Infrastructure
+
+- **Frontend:** Netlify
+- **Backend API:** Heroku
+- **Database:** Neon PostgreSQL
+- **Media Storage:** Cloudinary
+
+The portfolio has completed production deployment and QA testing, including administrator authentication, CMS CRUD operations, API security, responsive design, keyboard accessibility, and reduced-motion support.
+
+The project also includes Venom-Sprint, a playable browser-based arcade game built with vanilla JavaScript, HTML, and CSS.
 
 ## Developer
 
@@ -78,9 +97,9 @@ my-portfolio/
 
 ### Client
 
-The `client` directory contains the React application.
+The `client` directory contains the React application, built with Vite and React Router.
 
-The public portfolio will be a single-page scrolling experience containing:
+The public portfolio is a single-page scrolling experience containing:
 
 - Hero
 - About
@@ -90,19 +109,25 @@ The public portfolio will be a single-page scrolling experience containing:
 - Contact
 - Footer
 
-Navigation will use smooth scrolling between sections rather than separate public pages.
+Navigation uses smooth scrolling between sections rather than separate public pages.
 
-Project case studies will open in modal overlays so visitors can explore projects without leaving the main portfolio page.
+Project cards open accessible case-study modals, allowing visitors to explore detailed project information, technologies, screenshots, and relevant links without leaving the portfolio.
 
-The admin interface will use protected React Router routes.
+The administrator interface uses protected React Router routes and JWT-based authentication.
+
+The frontend is deployed to Netlify and communicates with the production Express API hosted on Heroku.
+
+The application also serves Venom-Sprint, a standalone vanilla JavaScript arcade game, from `/games/venom-sprint/index.html`.
 
 ### Server
 
-The `server` directory contains the Express REST API.
+The `server` directory contains the Node.js and Express REST API.
 
-The backend uses CommonJS and separates the Express application from the server startup process.
+The backend uses CommonJS modules and separates Express application configuration from the server startup process.
 
-Planned backend structure:
+The application follows a modular architecture with dedicated controllers, database configuration, middleware, routes, services, and utilities.
+
+Backend structure:
 
 ```text
 server/
@@ -116,36 +141,55 @@ server/
 └── server.js
 ```
 
-The backend will manage:
+The backend manages:
 
-- Admin authentication
-- Projects
-- Technologies
-- Project images
-- Project/technology relationships
-- Contact messages
-- Cloudinary media integration
+- Administrator authentication and JWT verification
+- Project creation, retrieval, updates, and deletion
+- Project publishing, featured status, and display order
+- Technologies and project-technology relationships
+- Cloudinary image uploads and metadata management
+- Contact form submissions and administrator message management
+- Request validation and protected administrator endpoints
+- CORS, security headers, rate limiting, and centralized error handling
+
+The production API is deployed to Heroku and connects to a PostgreSQL database hosted on Neon.
 
 ---
 
 ## Database Design
 
-The PostgreSQL database will contain six primary tables:
+The application uses PostgreSQL as its relational database, with the production database hosted on Neon.
 
-- `admins`
-- `projects`
-- `technologies`
-- `project_technologies`
-- `project_images`
-- `contact_messages`
+The database contains six primary tables:
 
-Database implementation begins in Phase 2.
+- `admins` — Administrator accounts and authentication credentials
+- `projects` — Portfolio projects, case-study content, publishing status, and display order
+- `technologies` — Technologies and their categories
+- `project_technologies` — Many-to-many relationships between projects and technologies
+- `project_images` — Project image metadata and Cloudinary references
+- `contact_messages` — Contact form submissions and message management
+
+The database uses relational constraints, foreign keys, and parameterized queries to maintain data integrity and support secure application operations.
+
+The production database has been populated and verified, including project records, technologies, project relationships, administrator authentication, and image metadata.
+
+Detailed schema definitions and database implementation notes are preserved in Phase 2.
 
 ---
 
-## Planned REST API
+## REST API
 
-The application will use a REST API with `/api` as the primary API prefix.
+The application exposes a REST API through the Node.js and Express backend, using `/api` as the primary API prefix.
+
+Public endpoints provide access to published projects, technologies, and contact form submissions.
+
+Protected administrator endpoints use JWT authentication and support project management, technology management, Cloudinary image operations, and contact message administration.
+
+The production API is hosted at:
+
+```text
+https://eli-rodriguez-portfolio-api-34863b10298c.herokuapp.com
+```
 
 ### Authentication
 
@@ -215,9 +259,11 @@ DELETE /api/admin/messages/:id
 
 ## Frontend Architecture
 
-The React application will be organized into public, admin, and shared components.
+The frontend is a React single-page application built with Vite, React Router, JavaScript, and CSS.
 
-Planned structure:
+The application separates public portfolio functionality from protected administrator functionality, with reusable components, authentication context, custom hooks, and API service modules.
+
+Frontend source structure:
 
 ```text
 client/src/
@@ -239,13 +285,13 @@ client/src/
 
 ### Public Portfolio
 
-The public portfolio will remain primarily on:
+The public portfolio is served at the root route:
 
 ```text
 /
 ```
 
-Planned section IDs:
+The single-page application contains the following section IDs:
 
 ```text
 #home
@@ -256,37 +302,50 @@ Planned section IDs:
 #contact
 ```
 
-The navbar will eventually include:
+The navigation includes:
 
 - Sticky navigation
-- Smooth scrolling
+- Smooth scrolling between sections
 - Active section highlighting
 - Responsive mobile navigation
+- Keyboard-accessible navigation controls
+
+The Skills and Projects sections retrieve published application data through the Express REST API.
+
+The public portfolio also includes a downloadable résumé, an integrated contact form, and accessible project case-study modals.
+
+The application is responsive across desktop and mobile screen sizes and supports reduced-motion accessibility preferences.
 
 ### Project Case Studies
 
-Project cards will open large modal case studies rather than navigating visitors away from the portfolio.
+Project cards open accessible modal overlays that display detailed information about each published project without navigating away from the portfolio.
 
-Case studies can contain:
+Each case study supports:
 
-- Project title
+- Project title and overview
 - Cover image
-- Overview
-- Problem
-- Solution
-- Features
-- Challenges
-- Lessons learned
-- Technology stack
+- Problem and solution
+- Key features
+- Challenges and lessons learned
+- Associated technologies
 - Screenshot gallery
-- GitHub link
-- Live application link
-- Project status
-- Project type
+- GitHub repository link
+- Live application link, when available
+- Project status and type
+
+Project details, technology relationships, and image metadata are retrieved through the Express REST API.
+
+The modal system includes keyboard navigation, focus management, Escape-key dismissal, and responsive layouts.
+
+The initial published portfolio features VinoVault 2.0, You Party – I Pour, and Venom-Sprint.
 
 ### Admin Routes
 
-Planned protected admin routes include:
+The application includes a protected administrator interface built with React Router.
+
+Administrator authentication uses JWT tokens, with protected routes restricting access to authenticated administrators.
+
+The implemented administrator routes include:
 
 ```text
 /admin/login
@@ -299,126 +358,183 @@ Planned protected admin routes include:
 /admin/messages/:id
 ```
 
+The administrator interface provides:
+
+- Secure administrator login and logout
+- Authentication session persistence
+- Administrator dashboard
+- Project creation, editing, publishing, and deletion
+- Technology management
+- Project image uploads and metadata management
+- Contact message viewing, read-status updates, and deletion
+
+The production administrator interface is hosted on Netlify and communicates with the protected Express API on Heroku.
+
+Administrator authentication, session handling, and CMS operations were verified during Phase 18F production QA.
+
 ---
 
 ## Featured Projects
 
-The initial portfolio will showcase the following projects.
+The production portfolio currently showcases three published projects, demonstrating full-stack application development, business-focused solutions, and core JavaScript programming.
 
 ### VinoVault 2.0
 
-Full-stack wine collection and tasting journal application built with React, Django REST Framework, and PostgreSQL.
+A full-stack wine catalog, personal cellar management, and tasting journal application built with React, Django REST Framework, and PostgreSQL.
+
+The application demonstrates REST API integration, JWT authentication, relational database design, protected user functionality, and CRUD operations.
 
 ### You Party – I Pour
 
-Client-oriented mobile bartending service application built with React, Node.js, Express, and PostgreSQL.
+A full-stack mobile bartending service application built with React, Node.js, Express, and PostgreSQL.
 
-### JavaScript Snake Game
+The application includes public service listings, event quote requests, booking availability checks, confirmation workflows, and an administrator interface for managing bookings, calendar availability, and gallery media.
 
-Browser-based Snake game built with vanilla JavaScript, HTML, and CSS.
+### Venom-Sprint
 
-The game will eventually be playable directly from the portfolio while preserving the original vanilla JavaScript implementation.
+A browser-based Snake arcade game built with vanilla JavaScript, HTML, and CSS.
+
+The game includes keyboard controls, scoring, persistent high scores, adjustable gameplay speed, and pause/restart functionality.
+
+Venom-Sprint is integrated into the production portfolio as a playable standalone game at:
+
+```text
+/games/venom-sprint/index.html
+```
 
 ### Developer Portfolio
 
-This portfolio will itself become a case study demonstrating:
+This portfolio is itself a production-deployed full-stack application demonstrating:
 
-- React architecture
-- Express API development
-- PostgreSQL database design
-- Authentication
-- CMS development
-- Cloudinary integration
-- Responsive design
-- Accessibility
-- Testing
-- Deployment
+- React application architecture and responsive design
+- Express REST API development
+- PostgreSQL database design and relational data management
+- JWT-based administrator authentication
+- Custom CMS development and CRUD operations
+- Cloudinary media integration
+- Accessibility and keyboard interaction
+- Production security and API validation
+- Deployment using Netlify, Heroku, and Neon
+- End-to-end production quality assurance
+
+The portfolio's implementation and development history are documented throughout this README.
 
 ---
 
 ## Admin CMS
 
-The application will include a custom protected admin CMS.
+The application includes a custom, protected administration CMS for managing portfolio content without modifying the application's source code.
 
-The admin will eventually be able to:
+Administrator access is restricted through JWT-based authentication and protected frontend routes.
 
-- Sign in securely
-- View an admin dashboard
-- Create projects
-- Edit projects
-- Delete projects
-- Publish and unpublish projects
-- Feature and unfeature projects
-- Reorder projects
-- Manage project type and status
-- Manage project case-study content
-- Manage GitHub and live application URLs
-- Manage technologies
-- Associate technologies with projects
-- Upload project images
-- Delete project images
-- Select project cover images
-- Manage image captions
-- Manage image alt text
-- Reorder project images
-- View contact messages
-- Mark messages read or unread
-- Delete messages
-- Log out
+### CMS Features
 
-There will be no public registration system. Authentication exists specifically for the portfolio administrator.
+The administrator interface supports:
+
+- Secure administrator sign-in and logout
+- Administrator dashboard
+- Project creation, editing, and deletion
+- Project publishing and unpublishing
+- Featured project management
+- Project display ordering
+- Project type and status management
+- Project case-study content management
+- GitHub repository and live application URL management
+- Technology creation, editing, and deletion
+- Project-technology associations
+- Cloudinary project image uploads
+- Project image deletion
+- Project cover image selection
+- Image captions and alternative text management
+- Project image display ordering
+- Contact message viewing
+- Contact message read and unread status management
+- Contact message deletion
+
+### Authentication and Access Control
+
+The CMS does not provide public administrator registration.
+
+Administrator accounts are managed separately from the public portfolio, and protected API endpoints require valid JWT authentication.
+
+Administrator authentication, project and technology CRUD operations, image management, and contact message administration were verified during Phase 18F production QA.
+
+The CMS frontend is hosted on Netlify and communicates with the Express REST API deployed on Heroku.
 
 ---
 
-## Security Goals
+## Security
 
-The application will eventually include:
+The application implements multiple layers of security across the React frontend, Express REST API, and PostgreSQL database.
 
-- Password hashing with bcrypt
-- JWT authentication
-- Protected admin endpoints
-- Environment variables
-- Parameterized PostgreSQL queries
-- CORS configuration
-- Request validation
-- Request size limits
-- Rate limiting where appropriate
-- Secure error responses
-- Contact form spam protection
+### Implemented Security Measures
 
-Sensitive environment files will never be committed to Git.
+- **Password hashing:** Administrator passwords are securely hashed using bcrypt.
+- **JWT authentication:** Protected administrator endpoints require valid JSON Web Tokens.
+- **Protected routes:** Administrator pages restrict access to authenticated users.
+- **Environment configuration:** Sensitive configuration values and credentials are managed through environment variables.
+- **Parameterized SQL queries:** PostgreSQL operations use parameterized queries to reduce SQL injection risks.
+- **CORS configuration:** The Express API restricts cross-origin access according to its configured policies.
+- **Security headers:** Helmet configures HTTP security headers.
+- **Request validation:** API inputs are validated before processing.
+- **Request size limits:** Express request payload limits help reduce oversized request risks.
+- **Rate limiting:** API rate limiting helps mitigate excessive requests.
+- **Error handling:** Centralized error handling avoids unnecessarily exposing internal application details.
+
+Sensitive environment files and production credentials are excluded from version control.
+
+### Planned Post-Release Security Improvements
+
+The following contact-form spam protections were deliberately deferred until after Phase 18:
+
+- **Honeypot field:** Add a hidden form field to help detect automated spam submissions.
+- **Cloudflare Turnstile:** Add server-verified bot protection to the public contact form.
+
+These features are not currently implemented and will be addressed as post-release enhancements.
+
+### Production Security Verification
+
+Phase 18F production QA included verification of administrator authentication, protected API behavior, request validation, security-related responses, and public contact form functionality.
 
 ---
 
 ## Visual Direction
 
-The portfolio will use a dark-first visual design with a professional, modern, and slightly technical appearance.
+The portfolio follows a dark-first visual design with a professional, modern, and slightly technical appearance.
+
+The design emphasizes readability, accessible interactions, responsive layouts, and clear presentation of software development projects.
 
 ### General Style
 
-- Dark charcoal/navy backgrounds
-- Warm amber/gold accent color
+The visual design uses:
+
+- Dark charcoal and navy backgrounds
+- Warm amber and gold accent colors
 - Warm white primary text
 - Muted gray secondary text
-- Clean typography
-- Strong spacing
-- Responsive layouts
-- Minimal and intentional animation
+- Clean, readable typography
+- Consistent spacing and visual hierarchy
+- Responsive desktop and mobile layouts
+- Minimal, intentional animation
 
-The design should feel professional and personal without becoming overly corporate or resembling a neon hacker-style portfolio.
+The overall appearance balances a professional presentation with a personal identity, avoiding excessive visual effects or an overly corporate aesthetic.
 
 ### Interaction
 
-Planned interactions include:
+The portfolio includes:
 
 - Subtle section entrance animations
 - Project card hover effects
-- Sticky navbar behavior
+- Sticky navigation
 - Active section highlighting
-- Modal fade/scale transitions
+- Accessible project case-study modals
 - Responsive mobile navigation
+- Keyboard-accessible interactive elements
+- Reduced-motion support
 
-Animations should remain restrained and should never distract from the project content.
+Animations are intentionally restrained to keep the focus on project content and usability.
+
+Accessibility and responsive behavior were reviewed and verified during Phase 18B and Phase 18F.
 
 ---
 
@@ -442,7 +558,7 @@ Animations should remain restrained and should never distract from the project c
 - [x] Phase 15 — Project Management CMS
 - [x] Phase 16 — Technologies, Images & Messages CMS
 - [x] Phase 17 — Snake Game Integration
-- [ ] Phase 18 — Testing, Polish & Deployment
+- [x] Phase 18 — Testing, Polish & Deployment
 
 ---
 
@@ -834,12 +950,9 @@ The project now has:
 
 **Complete ✅**
 
-The Venom-Sprint project record uses this internal path as its live URL. The project case-study modal recognizes portfolio-hosted `/games/` destinations and displays a `Play Game` action instead of the standard `View Live Site` action.
+### Phase 18 - Testing, Polish & Deployment
 
-The Admin Project form now supports both external live URLs and internal portfolio paths.
-
-**Next:** Phase 18 — Testing, Polish & Deployment
-
+** Complete ✅**
 
 Current backend capabilities include:
 
@@ -2069,7 +2182,6 @@ PostgreSQL
       ↓
 Technology collection
 
-
 ADMIN
 
 Administrator
@@ -2107,7 +2219,6 @@ The portfolio backend can now:
 - Reuse the Phase 4 JWT middleware for CMS resources
 - Server JavaScript syntax checks pass
 - React client lint and production build pass
-
 
 ---
 
@@ -2462,7 +2573,6 @@ PostgreSQL
       ↓
 Public project data
 
-
 ADMIN
 
 Administrator
@@ -2480,7 +2590,6 @@ Parameterized SQL
 PostgreSQL
       ↓
 Project CRUD
-
 
 PROJECT TECHNOLOGIES
 
@@ -2996,7 +3105,6 @@ PostgreSQL transaction
       ↓
 project_images
 
-
 PUBLIC PROJECT COLLECTION
 
 React portfolio
@@ -3009,7 +3117,6 @@ Cover image lookup
       ↓
 cover_image
 
-
 PUBLIC PROJECT CASE STUDY
 
 React portfolio
@@ -3021,7 +3128,6 @@ Published project
 Ordered project_images
       ↓
 images[]
-
 
 PROJECT DELETION
 
@@ -3518,7 +3624,6 @@ contact_messages
       ↓
 201 Created
 
-
 ADMIN MESSAGE COLLECTION
 
 Administrator
@@ -3533,7 +3638,6 @@ Newest first
       ↓
 Admin inbox
 
-
 ADMIN MESSAGE REVIEW
 
 Administrator
@@ -3547,7 +3651,6 @@ Individual message
 PATCH is_read
       ↓
 Read / unread state
-
 
 ADMIN MESSAGE DELETION
 
@@ -3595,7 +3698,6 @@ The project is ready for:
 **Phase 9 — React Foundation**
 
 ---
-
 
 ## Phase 9 — React Foundation
 
@@ -4518,9 +4620,7 @@ Phase 10 establishes the complete public portfolio presentation layer.
 
 Phase 11 will replace the temporary Skills and Projects frontend data with live data from the existing Express/PostgreSQL API.
 
-
 **Phase 10 — React Foundation: Complete**
-
 
 ---
 
@@ -4967,8 +5067,6 @@ Phase 11 completes the transition of the Skills and Projects sections from tempo
 The public portfolio presentation is now connected to the application data layer while retaining the visual system and responsive behavior established during Phase 10.
 
 Phase 12 will build the interactive Project Case Study Modal, allowing visitors to explore individual projects in greater detail without leaving the single-page portfolio.
-
-
 
 ---
 
@@ -5788,7 +5886,6 @@ The portfolio now has a responsive administrative application shell with authent
 
 Phase 15 will build the Project Management CMS.
 
-
 ---
 
 ## Phase 15 — Project Management CMS
@@ -5926,7 +6023,6 @@ Phase 15 passed:
 Phase 15 is complete.
 
 Phase 16 will build the Technologies, Images & Messages CMS.
-
 
 ---
 
@@ -6134,7 +6230,6 @@ Phase 16 is complete.
 
 Phase 17 will integrate the Snake game into the portfolio.
 
-
 ---
 
 ## Phase 17 — Snake Game Integration
@@ -6329,14 +6424,13 @@ Phase 17 is complete.
 
 Phase 18 continues with final testing, production hardening, polish, and deployment.
 
-
 ---
 
-# Phase 18 — Testing, Polish & Deployment 🚧
+# Phase 18 — Testing, Polish & Deployment ✅
 
-Phase 18 prepares the completed portfolio application for production release through full application auditing, UI/UX and accessibility refinement, security hardening, content review, deployment, and final production QA.
+Phase 18 covers the final production preparation and release of the completed developer portfolio, including application auditing, UI/UX and accessibility improvements, security hardening, content review, deployment, production QA, and release documentation.
 
-Phase 18 is not considered complete until the deployed application passes final production testing.
+Phases 18A–18F have been completed, including deployment to Netlify and Heroku and successful production QA. Phase 18G — Final Documentation & Release — is the remaining release milestone.
 
 ## Phase 18A — Full Application Audit ✅
 
@@ -6393,7 +6487,6 @@ Name:     100 characters
 Email:    255 characters
 Subject:  200 characters
 Message:  5000 characters
-
 
 ```
 
@@ -6458,7 +6551,6 @@ PostgreSQL SSL configuration and reverse-proxy trust configuration remain deploy
 A fresh JWT signing secret must be configured before production deployment.
 
 Phase 18C is complete.
-
 
 ## Phase 18D — Portfolio Content Audit ✅
 
@@ -6586,8 +6678,6 @@ The deployed application now has a functioning production path from the Netlify 
 Administrator authentication and complete production CRUD workflow testing will be performed during Phase 18F.
 
 Phase 18E is complete.
-
-
 
 ## Phase 18F — Production QA ✅
 
@@ -6727,7 +6817,7 @@ Public browser console audit:        PASS
 Mobile responsiveness:               PASS
 Keyboard accessibility:              PASS
 Reduced-motion accessibility:        PASS
-ESLint:                               PASS
+ESLint:                              PASS
 Vite production build:               PASS
 Git whitespace validation:           PASS
 ```
@@ -6738,7 +6828,52 @@ No blocking issues were identified during the completed production QA checks.
 
 Phase 18F is complete.
 
+## Phase 18G — Final Documentation & Release ✅
 
+Phase 18G finalizes the developer portfolio's production documentation and prepares the completed application for its final release commit.
+
+### Production Deployment
+
+The portfolio is deployed across the following services:
+
+- **Frontend:** Netlify — https://eli-rodriguez-portfolio.netlify.app/
+- **Backend API:** Heroku — https://eli-rodriguez-portfolio-api-34863b10298c.herokuapp.com/
+- **Production Database:** Neon PostgreSQL
+- **Project Media:** Cloudinary
+- **Source Repository:** https://github.com/Geniozx/my-portfolio
+
+### Release Documentation
+
+- [x] Update README project overview
+- [x] Document deployed application architecture
+- [x] Document database design and implemented REST API
+- [x] Document public portfolio and administrator CMS
+- [x] Document featured projects and security measures
+- [x] Update visual direction documentation
+- [x] Review development roadmap and workflow
+- [x] Review Phase 18 release documentation
+- [x] Complete final README formatting cleanup
+- [x] Run final documentation validation
+- [x] Verify final Git changes
+- [x] Commit and push Phase 18G release documentation
+
+### Production Readiness
+
+Phase 18F verified the deployed portfolio's public functionality, administrator CMS, authentication, API security, responsive layouts, accessibility behavior, and production build.
+
+No blocking issues were identified during production QA.
+
+The contact-form honeypot and Cloudflare Turnstile remain deferred post-release enhancements and are not included in the current production release.
+
+### Release Status
+
+The application is deployed and has passed production QA.
+
+Phase 18G documentation, formatting, validation, and repository review are complete.
+
+The final release documentation is prepared for publication through the project's Git repository.
+
+---
 
 ## Remaining Phase 18 Work
 
@@ -6746,4 +6881,4 @@ Phase 18F is complete.
 - [x] Phase 18D — Portfolio Content Audit
 - [x] Phase 18E — Deployment
 - [x] Phase 18F — Production QA
-- [ ] Phase 18G — Final Documentation & Release
+- [x] Phase 18G — Final Documentation & Release
