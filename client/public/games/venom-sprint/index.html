@@ -37,6 +37,16 @@
             alt="Venom-Sprint game logo"
           >
 
+          <!-- Leaderboard button displayed before gameplay -->
+          <button
+            type="button"
+            id="leaderboardBtn"
+            class="leaderboard-splash-button"
+            aria-haspopup="dialog"
+          >
+            🏆 Global Top 10
+          </button>
+
           <canvas
             id="gameBoard"
             width="400"
@@ -90,6 +100,37 @@
                 <span id="resultScore">0</span>
               </p>
 
+              <!-- Global leaderboard score submission -->
+              <form id="scoreSubmissionForm" hidden>
+                <label for="playerNickname">
+                  Enter Your Arcade Nickname
+                </label>
+
+                <input
+                  type="text"
+                  id="playerNickname"
+                  name="nickname"
+                  minlength="3"
+                  maxlength="12"
+                  pattern="[A-Za-z0-9_]{3,12}"
+                  autocomplete="off"
+                  spellcheck="false"
+                  placeholder="3–12 characters"
+                  required
+                >
+
+                <button type="submit" id="submitScoreBtn">
+                  Submit Score
+                </button>
+              </form>
+
+              <p
+                id="scoreSubmissionStatus"
+                role="status"
+                aria-live="polite"
+                hidden
+              ></p>
+
               <button type="button" id="playAgainBtn">
                 Play Again
               </button>
@@ -115,6 +156,7 @@
           <span id="gameStatusText">READY</span>
         </div>
 
+
         <!-- Mobile directional controls -->
         <div
           id="mobileControls"
@@ -128,7 +170,9 @@
             data-direction="up"
             aria-label="Move up"
           >
-            ▲
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 4 L22 20 H2 Z" fill="currentColor" />
+            </svg>
           </button>
 
           <button
@@ -137,7 +181,9 @@
             data-direction="left"
             aria-label="Move left"
           >
-            ◀
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M4 12 L20 2 V22 Z" fill="currentColor" />
+            </svg>
           </button>
 
           <button
@@ -146,7 +192,9 @@
             data-direction="down"
             aria-label="Move down"
           >
-            ▼
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M2 4 H22 L12 20 Z" fill="currentColor" />
+            </svg>
           </button>
 
           <button
@@ -155,9 +203,12 @@
             data-direction="right"
             aria-label="Move right"
           >
-            ▶
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 12 L4 2 V22 Z" fill="currentColor" />
+            </svg>
           </button>
         </div>
+
 
         <div id="controls">
           <button type="button" id="restartBtn">Restart</button>
@@ -179,6 +230,60 @@
         </div>
       </div>
     </main>
+
+    <!-- Global Top 10 Leaderboard Modal -->
+    <div
+      id="leaderboardModal"
+      class="modal leaderboard-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="leaderboardModalTitle"
+      hidden
+    >
+      <div class="modal-content leaderboard-modal__content">
+
+        <button
+          type="button"
+          id="closeLeaderboardBtn"
+          class="leaderboard-modal__close"
+          aria-label="Close leaderboard"
+        >
+          &times;
+        </button>
+
+        <p class="leaderboard-modal__eyebrow">
+          VENOM SPRINT
+        </p>
+
+        <h2 id="leaderboardModalTitle">
+          🏆 Global Top 10
+        </h2>
+
+        <p
+          id="leaderboardStatus"
+          role="status"
+          aria-live="polite"
+        >
+          Loading leaderboard...
+        </p>
+
+        <div class="leaderboard-modal__table-wrapper">
+          <table id="leaderboardTable" hidden>
+            <thead>
+              <tr>
+                <th scope="col">Rank</th>
+                <th scope="col">Player</th>
+                <th scope="col">Score</th>
+              </tr>
+            </thead>
+
+            <tbody id="leaderboardTableBody">
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
 
     <!-- Help Modal -->
     <div
@@ -207,6 +312,13 @@
           <li><b>End</b>: Stop the current game</li>
           <li><b>Help</b>: Open this modal</li>
           <li><b>🔊 / 🔇</b>: Turn game sounds on or off</li>
+          <li>
+            <b>Global Top 10</b>: View rankings before playing or while paused.
+          </li>
+
+          <li>
+            <b>Submit Score</b>: Enter a nickname after Game Over.
+          </li>
         </ul>
       </div>
     </div>
